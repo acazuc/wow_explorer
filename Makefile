@@ -7,7 +7,7 @@ LIB_DIR = lib/build
 INCLUDES = -I src
 INCLUDES+= -I $(LIB_DIR)/include
 
-CFLAGS = -Wall -Wextra -Wshadow -Wunused -pipe -g
+CFLAGS = -Wall -Wextra -Wshadow -Wunused -pipe -g -O2
 CFLAGS+= $(shell pkg-config --cflags gtk+-3.0)
 
 LIBRARY = -L $(LIB_DIR)/lib

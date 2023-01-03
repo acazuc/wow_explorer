@@ -113,6 +113,8 @@ struct display *adt_display_new(const struct node *node, const char *path, wow_m
 		gtk_tree_store_set(store, &mcnk_iter, 0, "liquids", 1, 0x1000006, -1);
 		gtk_tree_store_append(store, &mcnk_iter, NULL);
 		gtk_tree_store_set(store, &mcnk_iter, 0, "objects", 1, 0x1000007, -1);
+		gtk_tree_store_append(store, &mcnk_iter, NULL);
+		gtk_tree_store_set(store, &mcnk_iter, 0, "wmo", 1, 0x1000008, -1);
 	}
 	for (uint32_t i = 0; i < 256; ++i)
 	{
@@ -637,6 +639,56 @@ static GtkWidget *build_adt_objects(struct adt_display *display)
 	return tree;
 }
 
+static GtkWidget *build_adt_wmo(struct adt_display *display)
+{
+	GtkListStore *store = gtk_list_store_new(8, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+	GtkWidget *tree = gtk_tree_view_new();
+	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree), true);
+	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
+	GtkTreeViewColumn *column;
+	column = gtk_tree_view_column_new_with_attributes("name", renderer, "text", 0, NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+	gtk_tree_view_column_set_sort_column_id(column, 0);
+	column = gtk_tree_view_column_new_with_attributes("id", renderer, "text", 1, NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+	gtk_tree_view_column_set_sort_column_id(column, 1);
+	column = gtk_tree_view_column_new_with_attributes("position", renderer, "text", 2, NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+	gtk_tree_view_column_set_sort_column_id(column, 2);
+	column = gtk_tree_view_column_new_with_attributes("rotation", renderer, "text", 3, NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+	gtk_tree_view_column_set_sort_column_id(column, 3);
+	column = gtk_tree_view_column_new_with_attributes("aabb", renderer, "text", 4, NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+	gtk_tree_view_column_set_sort_column_id(column, 4);
+	column = gtk_tree_view_column_new_with_attributes("flags", renderer, "text", 5, NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+	gtk_tree_view_column_set_sort_column_id(column, 5);
+	column = gtk_tree_view_column_new_with_attributes("doodad_set", renderer, "text", 6, NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+	gtk_tree_view_column_set_sort_column_id(column, 6);
+	column = gtk_tree_view_column_new_with_attributes("name_set", renderer, "text", 7, NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+	gtk_tree_view_column_set_sort_column_id(column, 7);
+	for (size_t i = 0; i < display->file->modf.data_nb; ++i)
+	{
+		struct wow_modf_data *modf = &display->file->modf.data[i];
+		GtkTreeIter iter;
+		gtk_list_store_append(store, &iter);
+		SET_TREE_VALUE(0, "%s", &display->file->mwmo.data[display->file->mwid.data[modf->name_id]]);
+		SET_TREE_VALUE(1, "%" PRIu32, modf->unique_id);
+		SET_TREE_VALUE(2, "{%f, %f, %f}", modf->position.x, modf->position.y, modf->position.z);
+		SET_TREE_VALUE(3, "{%f, %f, %f}", modf->rotation.x, modf->rotation.y, modf->rotation.z);
+		SET_TREE_VALUE(4, "{%f, %f, %f}, {%f, %f, %f}", modf->aabb0.x, modf->aabb0.y, modf->aabb0.z, modf->aabb1.x, modf->aabb1.y, modf->aabb1.z);
+		SET_TREE_VALUE(5, "0x%" PRIx16, modf->flags);
+		SET_TREE_VALUE(6, "%" PRIu16, modf->doodad_set);
+		SET_TREE_VALUE(7, "%" PRIu16, modf->name_set);
+	}
+	gtk_tree_view_set_model(GTK_TREE_VIEW(tree), GTK_TREE_MODEL(store));
+	gtk_widget_show(tree);
+	return tree;
+}
+
 static GtkWidget *build_adt(struct adt_display *display, int what)
 {
 	GtkWidget *widget = NULL;
@@ -656,6 +708,9 @@ static GtkWidget *build_adt(struct adt_display *display, int what)
 			break;
 		case 7:
 			widget = build_adt_objects(display);
+			break;
+		case 8:
+			widget = build_adt_wmo(display);
 			break;
 	}
 	GtkWidget *scrolled = gtk_scrolled_window_new(NULL, NULL);
