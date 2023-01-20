@@ -20,7 +20,7 @@ static void dtr(struct display *ptr)
 	(void)ptr;
 }
 
-struct display *wdt_display_new(const struct node *node, const char *path, wow_mpq_file_t *mpq_file)
+struct display *wdt_display_new(const struct node *node, const char *path, struct wow_mpq_file *mpq_file)
 {
 	(void)node;
 	(void)path;

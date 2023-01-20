@@ -39,6 +39,7 @@ SRCS_NAME = explorer.c \
             displays/wdl.c \
             displays/wdt.c \
             displays/wmo.c \
+            displays/wmo_group.c \
 
 SRCS = $(addprefix $(SRCS_PATH)/, $(SRCS_NAME))
 

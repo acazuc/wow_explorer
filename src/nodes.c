@@ -138,6 +138,7 @@ static const struct
 	{".css" , txt_display_new},
 	{".html", txt_display_new},
 	{".zmp" , txt_display_new},
+	{".wmo" , wmo_display_new},
 };
 
 static void mpq_file_on_click(struct node *node)

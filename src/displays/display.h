@@ -3,14 +3,7 @@
 
 #include <gtk/gtk.h>
 
-struct wow_adt_file;
-struct wow_blp_file;
-struct wow_bls_file;
-struct wow_dbc_file;
 struct wow_mpq_file;
-struct wow_wdl_file;
-struct wow_wdt_file;
-struct wow_m2_file;
 struct display;
 struct node;
 
@@ -33,5 +26,7 @@ struct display *wdl_display_new(const struct node *node, const char *path, struc
 struct display *wdt_display_new(const struct node *node, const char *path, struct wow_mpq_file *file);
 struct display *m2_display_new(const struct node *node, const char *path, struct wow_mpq_file *file);
 struct display *img_display_new(const struct node *node, const char *path, struct wow_mpq_file *file);
+struct display *wmo_display_new(const struct node *node, const char *path, struct wow_mpq_file *file);
+struct display *wmo_group_display_new(const struct node *node, const char *path, struct wow_mpq_file *file);
 
 #endif

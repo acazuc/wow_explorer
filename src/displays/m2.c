@@ -73,8 +73,8 @@ struct display *m2_display_new(const struct node *node, const char *path, wow_mp
 	gtk_container_add(GTK_CONTAINER(left_paned), tree);
 	gtk_widget_show(left_paned);
 	gtk_widget_show(right_paned);
-	gtk_paned_pack1(GTK_PANED(paned), left_paned, true, true);
-	gtk_paned_pack2(GTK_PANED(paned), right_paned, false, false);
+	gtk_paned_pack1(GTK_PANED(paned), left_paned, false, false);
+	gtk_paned_pack2(GTK_PANED(paned), right_paned, true, true);
 	gtk_paned_set_position(GTK_PANED(paned), 200);
 	gtk_widget_show(paned);
 	display->display.root = paned;
