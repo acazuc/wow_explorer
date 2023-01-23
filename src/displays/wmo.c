@@ -5,7 +5,7 @@
 #include <inttypes.h>
 #include <stdbool.h>
 
-#define ADD_TREE_COLUMN(name, id) \
+#define ADD_TREE_COLUMN(id, name) \
 do \
 { \
 	GtkTreeViewColumn *column = gtk_tree_view_column_new_with_attributes(name, renderer, "text", id, NULL); \
@@ -133,8 +133,8 @@ static GtkWidget *build_motx(struct wmo_display *display)
 	GtkWidget *tree = gtk_tree_view_new();
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree), true);
 	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
-	ADD_TREE_COLUMN("offset", 0);
-	ADD_TREE_COLUMN("texture", 1);
+	ADD_TREE_COLUMN(0, "offset");
+	ADD_TREE_COLUMN(1, "texture");
 	for (uint32_t i = 0; i < display->file->motx.data_len; ++i)
 	{
 		if (!display->file->motx.data[i])
@@ -157,18 +157,18 @@ static GtkWidget *build_momt(struct wmo_display *display)
 	GtkWidget *tree = gtk_tree_view_new();
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree), true);
 	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
-	ADD_TREE_COLUMN("flags", 0);
-	ADD_TREE_COLUMN("shader", 1);
-	ADD_TREE_COLUMN("blend_mode", 2);
-	ADD_TREE_COLUMN("texture1", 3);
-	ADD_TREE_COLUMN("emissive_color", 4);
-	ADD_TREE_COLUMN("sidn_emissive_color", 5);
-	ADD_TREE_COLUMN("texture2", 6);
-	ADD_TREE_COLUMN("diff_color", 7);
-	ADD_TREE_COLUMN("group_type", 8);
-	ADD_TREE_COLUMN("texture3", 9);
-	ADD_TREE_COLUMN("color2", 10);
-	ADD_TREE_COLUMN("flags2", 11);
+	ADD_TREE_COLUMN(0, "flags");
+	ADD_TREE_COLUMN(1, "shader");
+	ADD_TREE_COLUMN(2, "blend_mode");
+	ADD_TREE_COLUMN(3, "texture1");
+	ADD_TREE_COLUMN(4, "emissive_color");
+	ADD_TREE_COLUMN(5, "sidn_emissive_color");
+	ADD_TREE_COLUMN(6, "texture2");
+	ADD_TREE_COLUMN(7, "diff_color");
+	ADD_TREE_COLUMN(8, "group_type");
+	ADD_TREE_COLUMN(9, "texture3");
+	ADD_TREE_COLUMN(10, "color2");
+	ADD_TREE_COLUMN(11, "flags2");
 	for (uint32_t i = 0; i < display->file->momt.data_nb; ++i)
 	{
 		struct wow_momt_data *momt = &display->file->momt.data[i];
@@ -198,8 +198,8 @@ static GtkWidget *build_mogn(struct wmo_display *display)
 	GtkWidget *tree = gtk_tree_view_new();
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree), true);
 	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
-	ADD_TREE_COLUMN("offset", 0);
-	ADD_TREE_COLUMN("texture", 1);
+	ADD_TREE_COLUMN(0, "offset");
+	ADD_TREE_COLUMN(1, "texture");
 	for (uint32_t i = 0; i < display->file->mogn.data_len; ++i)
 	{
 		if (!display->file->mogn.data[i])

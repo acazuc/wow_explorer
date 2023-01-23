@@ -5,6 +5,14 @@
 #include <inttypes.h>
 #include <stdbool.h>
 
+#define ADD_TREE_COLUMN(id, name) \
+do \
+{ \
+	GtkTreeViewColumn *column = gtk_tree_view_column_new_with_attributes(name, renderer, "text", id, NULL); \
+	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column); \
+	gtk_tree_view_column_set_sort_column_id(column, 0); \
+} while (0)
+
 #define SET_TREE_VALUE(id, fmt, ...) \
 do \
 { \
@@ -112,30 +120,17 @@ static GtkWidget *build_skin_sections(wow_m2_skin_profile_t *skin_profile)
 	GtkWidget *tree = gtk_tree_view_new();
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree), true);
 	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
-	GtkTreeViewColumn *column;
-	column = gtk_tree_view_column_new_with_attributes("id", renderer, "text", 0, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	gtk_tree_view_column_set_sort_column_id(column, 0);
-	column = gtk_tree_view_column_new_with_attributes("level", renderer, "text", 1, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("vertex_start", renderer, "text", 2, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("vertex_count", renderer, "text", 3, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("index_start", renderer, "text", 4, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("index_count", renderer, "text", 5, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("bone_count", renderer, "text", 6, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("bone_combo_index", renderer, "text", 7, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("bone_influences", renderer, "text", 8, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("center_bone_index", renderer, "text", 9, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("sort_radius", renderer, "text", 10, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+	ADD_TREE_COLUMN(0, "id");
+	ADD_TREE_COLUMN(1, "level");
+	ADD_TREE_COLUMN(2, "vertex_start");
+	ADD_TREE_COLUMN(3, "vertex_count");
+	ADD_TREE_COLUMN(4, "index_start");
+	ADD_TREE_COLUMN(5, "index_count");
+	ADD_TREE_COLUMN(6, "bone_count");
+	ADD_TREE_COLUMN(7, "bone_combo_index");
+	ADD_TREE_COLUMN(8, "bone_influences");
+	ADD_TREE_COLUMN(9, "center_bone_index");
+	ADD_TREE_COLUMN(10, "sort_radius");
 	for (uint32_t i = 0; i < skin_profile->sections_nb; ++i)
 	{
 		wow_m2_skin_section_t *section = &skin_profile->sections[i];
@@ -164,36 +159,20 @@ static GtkWidget *build_batchs(wow_m2_skin_profile_t *skin_profile)
 	GtkWidget *tree = gtk_tree_view_new();
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree), true);
 	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
-	GtkTreeViewColumn *column;
-	column = gtk_tree_view_column_new_with_attributes("id", renderer, "text", 0, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	gtk_tree_view_column_set_sort_column_id(column, 0);
-	column = gtk_tree_view_column_new_with_attributes("flags", renderer, "text", 1, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("priority_plane", renderer, "text", 2, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("shader_id", renderer, "text", 3, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("skin_section_index", renderer, "text", 4, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("geoset_index", renderer, "text", 5, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("color_index", renderer, "text", 6, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("material_index", renderer, "text", 7, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("material_layer", renderer, "text", 8, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("texture_count", renderer, "text", 9, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("texture_combo_index", renderer, "text", 10, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("texture_coord_combo_index", renderer, "text", 11, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("texture_weight_combo_index", renderer, "text", 12, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("texture_transform_combo_index", renderer, "text", 13, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+	ADD_TREE_COLUMN(0, "id");
+	ADD_TREE_COLUMN(1, "flags");
+	ADD_TREE_COLUMN(2, "priority_plane");
+	ADD_TREE_COLUMN(3, "shader_id");
+	ADD_TREE_COLUMN(4, "skin_section_index");
+	ADD_TREE_COLUMN(5, "geoset_index");
+	ADD_TREE_COLUMN(6, "color_index");
+	ADD_TREE_COLUMN(7, "material_index");
+	ADD_TREE_COLUMN(8, "material_layer");
+	ADD_TREE_COLUMN(9, "texture_count");
+	ADD_TREE_COLUMN(10, "texture_combo_index");
+	ADD_TREE_COLUMN(11, "texture_coord_combo_index");
+	ADD_TREE_COLUMN(12, "texture_weight_combo_index");
+	ADD_TREE_COLUMN(13, "texture_transform_combo_index");
 	for (uint32_t i = 0; i < skin_profile->batches_nb; ++i)
 	{
 		wow_m2_batch_t *batch = &skin_profile->batches[i];
@@ -239,14 +218,9 @@ static GtkWidget *build_materials(struct m2_display *display)
 	GtkWidget *tree = gtk_tree_view_new();
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree), true);
 	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
-	GtkTreeViewColumn *column;
-	column = gtk_tree_view_column_new_with_attributes("id", renderer, "text", 0, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	gtk_tree_view_column_set_sort_column_id(column, 0);
-	column = gtk_tree_view_column_new_with_attributes("flags", renderer, "text", 1, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("blend_mode", renderer, "text", 2, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+	ADD_TREE_COLUMN(0, "id");
+	ADD_TREE_COLUMN(1, "flags");
+	ADD_TREE_COLUMN(2, "blend_mode");
 	for (uint32_t i = 0; i < display->file->materials_nb; ++i)
 	{
 		wow_m2_material_t *material = &display->file->materials[i];
@@ -267,16 +241,10 @@ static GtkWidget *build_textures(struct m2_display *display)
 	GtkWidget *tree = gtk_tree_view_new();
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree), true);
 	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
-	GtkTreeViewColumn *column;
-	column = gtk_tree_view_column_new_with_attributes("id", renderer, "text", 0, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	gtk_tree_view_column_set_sort_column_id(column, 0);
-	column = gtk_tree_view_column_new_with_attributes("type", renderer, "text", 1, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("flags", renderer, "text", 2, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("filename", renderer, "text", 3, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+	ADD_TREE_COLUMN(0, "id");
+	ADD_TREE_COLUMN(1, "type");
+	ADD_TREE_COLUMN(2, "flags");
+	ADD_TREE_COLUMN(3, "filename");
 	for (uint32_t i = 0; i < display->file->textures_nb; ++i)
 	{
 		wow_m2_texture_t *texture = &display->file->textures[i];
@@ -298,18 +266,11 @@ static GtkWidget *build_cameras(struct m2_display *display)
 	GtkWidget *tree = gtk_tree_view_new();
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree), true);
 	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
-	GtkTreeViewColumn *column;
-	column = gtk_tree_view_column_new_with_attributes("id", renderer, "text", 0, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	gtk_tree_view_column_set_sort_column_id(column, 0);
-	column = gtk_tree_view_column_new_with_attributes("type", renderer, "text", 1, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("fov", renderer, "text", 2, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("far_clip", renderer, "text", 3, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("near_clip", renderer, "text", 4, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+	ADD_TREE_COLUMN(0, "id");
+	ADD_TREE_COLUMN(1, "type");
+	ADD_TREE_COLUMN(2, "fov");
+	ADD_TREE_COLUMN(3, "far_clip");
+	ADD_TREE_COLUMN(4, "near_clip");
 	for (uint32_t i = 0; i < display->file->cameras_nb; ++i)
 	{
 		wow_m2_camera_t *camera = &display->file->cameras[i];
@@ -332,16 +293,10 @@ static GtkWidget *build_lights(struct m2_display *display)
 	GtkWidget *tree = gtk_tree_view_new();
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree), true);
 	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
-	GtkTreeViewColumn *column;
-	column = gtk_tree_view_column_new_with_attributes("id", renderer, "text", 0, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	gtk_tree_view_column_set_sort_column_id(column, 0);
-	column = gtk_tree_view_column_new_with_attributes("type", renderer, "text", 1, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("bone", renderer, "text", 2, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("position", renderer, "text", 3, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+	ADD_TREE_COLUMN(0, "id");
+	ADD_TREE_COLUMN(1, "type");
+	ADD_TREE_COLUMN(2, "bone");
+	ADD_TREE_COLUMN(3, "position");
 	for (uint32_t i = 0; i < display->file->lights_nb; ++i)
 	{
 		wow_m2_light_t *light = &display->file->lights[i];
@@ -363,30 +318,17 @@ static GtkWidget *build_sequences(struct m2_display *display)
 	GtkWidget *tree = gtk_tree_view_new();
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree), true);
 	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
-	GtkTreeViewColumn *column;
-	column = gtk_tree_view_column_new_with_attributes("id", renderer, "text", 0, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	gtk_tree_view_column_set_sort_column_id(column, 0);
-	column = gtk_tree_view_column_new_with_attributes("id", renderer, "text", 1, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("variation_index", renderer, "text", 2, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("start", renderer, "text", 3, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("end", renderer, "text", 4, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("movespeed", renderer, "text", 5, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("flags", renderer, "text", 6, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("frequency", renderer, "text", 7, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("blend_time", renderer, "text", 8, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("variation_next", renderer, "text", 9, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("alias_next", renderer, "text", 10, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+	ADD_TREE_COLUMN(0, "id");
+	ADD_TREE_COLUMN(1, "id");
+	ADD_TREE_COLUMN(2, "variation_index");
+	ADD_TREE_COLUMN(3, "start");
+	ADD_TREE_COLUMN(4, "end");
+	ADD_TREE_COLUMN(5, "movespeed");
+	ADD_TREE_COLUMN(6, "flags");
+	ADD_TREE_COLUMN(7, "frequency");
+	ADD_TREE_COLUMN(8, "blend_time");
+	ADD_TREE_COLUMN(9, "variation_next");
+	ADD_TREE_COLUMN(10, "alias_next");
 	for (uint32_t i = 0; i < display->file->sequences_nb; ++i)
 	{
 		wow_m2_sequence_t *sequence = &display->file->sequences[i];
@@ -415,22 +357,13 @@ static GtkWidget *build_bones(struct m2_display *display)
 	GtkWidget *tree = gtk_tree_view_new();
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree), true);
 	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
-	GtkTreeViewColumn *column;
-	column = gtk_tree_view_column_new_with_attributes("id", renderer, "text", 0, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	gtk_tree_view_column_set_sort_column_id(column, 0);
-	column = gtk_tree_view_column_new_with_attributes("key_bone_id", renderer, "text", 1, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("flags", renderer, "text", 2, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("parent_bone", renderer, "text", 3, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("submesh_id", renderer, "text", 4, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("bone_name_crc", renderer, "text", 5, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("pivot", renderer, "text", 6, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+	ADD_TREE_COLUMN(0, "id");
+	ADD_TREE_COLUMN(1, "key_bone_id");
+	ADD_TREE_COLUMN(2, "flags");
+	ADD_TREE_COLUMN(3, "parent_bone");
+	ADD_TREE_COLUMN(4, "submesh_id");
+	ADD_TREE_COLUMN(5, "bone_name_crc");
+	ADD_TREE_COLUMN(6, "pivot");
 	for (uint32_t i = 0; i < display->file->bones_nb; ++i)
 	{
 		wow_m2_bone_t *bone = &display->file->bones[i];
@@ -455,78 +388,41 @@ static GtkWidget *build_particles(struct m2_display *display)
 	GtkWidget *tree = gtk_tree_view_new();
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree), true);
 	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
-	GtkTreeViewColumn *column;
-	column = gtk_tree_view_column_new_with_attributes("id", renderer, "text", 0, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	gtk_tree_view_column_set_sort_column_id(column, 0);
-	column = gtk_tree_view_column_new_with_attributes("flags", renderer, "text", 1, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("position", renderer, "text", 2, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("bone", renderer, "text", 3, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("texture", renderer, "text", 4, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("gemetry_model", renderer, "text", 5, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("recursion_model", renderer, "text", 6, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("blending_type", renderer, "text", 7, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("emitter_type", renderer, "text", 8, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("particle_type", renderer, "text", 9, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("head_or_tail", renderer, "text", 10, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("texture_tile_rotation", renderer, "text", 11, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("texture_dimensions_rows", renderer, "text", 12, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("texture_dimensions_columns", renderer, "text", 13, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("mid_point", renderer, "text", 14, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("color_values", renderer, "text", 15, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("scale_values", renderer, "text", 16, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("lifespan_uv_anim", renderer, "text", 17, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("decay_uv_anim", renderer, "text", 18, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("tail_uv_anim", renderer, "text", 19, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("tail_decay_uv_anim", renderer, "text", 20, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("tail_length", renderer, "text", 21, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("twinkle_speed", renderer, "text", 22, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("twinkle_percent", renderer, "text", 23, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("twinkle_scale_min", renderer, "text", 24, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("twinkle_scale_max", renderer, "text", 25, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("burst_multiplier", renderer, "text", 26, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("drag", renderer, "text", 27, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("spin", renderer, "text", 28, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("wind_vector", renderer, "text", 29, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("wind_time", renderer, "text", 30, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("follow_speed1", renderer, "text", 31, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("follow_scale1", renderer, "text", 32, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("follow_speed2", renderer, "text", 33, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	column = gtk_tree_view_column_new_with_attributes("follow_scale2", renderer, "text", 34, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+	ADD_TREE_COLUMN(0, "id");
+	ADD_TREE_COLUMN(1, "flags");
+	ADD_TREE_COLUMN(2, "position");
+	ADD_TREE_COLUMN(3, "bone");
+	ADD_TREE_COLUMN(4, "texture");
+	ADD_TREE_COLUMN(5, "geometry_model");
+	ADD_TREE_COLUMN(6, "recursion_model");
+	ADD_TREE_COLUMN(7, "blending_type");
+	ADD_TREE_COLUMN(8, "emitter_type");
+	ADD_TREE_COLUMN(9, "particle_type");
+	ADD_TREE_COLUMN(10, "hear_or_tail");
+	ADD_TREE_COLUMN(11, "texture_tile_rotation");
+	ADD_TREE_COLUMN(12, "texture_dimensions_rows");
+	ADD_TREE_COLUMN(13, "texture_dimensions_columns");
+	ADD_TREE_COLUMN(14, "mid_point");
+	ADD_TREE_COLUMN(15, "color_values");
+	ADD_TREE_COLUMN(16, "scale_values");
+	ADD_TREE_COLUMN(17, "lifespan_uv_anim");
+	ADD_TREE_COLUMN(18, "decay_uv_anim");
+	ADD_TREE_COLUMN(19, "tail_uv_anim");
+	ADD_TREE_COLUMN(20, "tial_decay_uv_anim");
+	ADD_TREE_COLUMN(21, "tail_length");
+	ADD_TREE_COLUMN(22, "twinkle_speed");
+	ADD_TREE_COLUMN(23, "twinkle_percent");
+	ADD_TREE_COLUMN(24, "twinkle_scale_min");
+	ADD_TREE_COLUMN(25, "twinkle_scale_max");
+	ADD_TREE_COLUMN(26, "burst_multiplier");
+	ADD_TREE_COLUMN(27, "drag");
+	ADD_TREE_COLUMN(28, "spin");
+	ADD_TREE_COLUMN(29, "wind_vector");
+	ADD_TREE_COLUMN(30, "wind_time");
+	ADD_TREE_COLUMN(31, "follow_speed1");
+	ADD_TREE_COLUMN(32, "follow_scale1");
+	ADD_TREE_COLUMN(33, "follow_speed2");
+	ADD_TREE_COLUMN(34, "follow_scale2");
 	for (uint32_t i = 0; i < display->file->particles_nb; ++i)
 	{
 		wow_m2_particle_t *particle = &display->file->particles[i];
@@ -575,18 +471,17 @@ static GtkWidget *build_particles(struct m2_display *display)
 
 static GtkWidget *build_texture_combiners_combos(struct m2_display *display)
 {
-	GtkListStore *store = gtk_list_store_new(1, G_TYPE_STRING);
+	GtkListStore *store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_STRING);
 	GtkWidget *tree = gtk_tree_view_new();
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree), true);
 	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
-	GtkTreeViewColumn *column;
-	column = gtk_tree_view_column_new_with_attributes("value", renderer, "text", 0, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	gtk_tree_view_column_set_sort_column_id(column, 0);
-	for (size_t i = 0; i < display->file->texture_combiner_combos_nb; ++i)
+	ADD_TREE_COLUMN(0, "id");
+	ADD_TREE_COLUMN(1, "value");
+	for (uint32_t i = 0; i < display->file->texture_combiner_combos_nb; ++i)
 	{
 		GtkTreeIter iter;
 		gtk_list_store_append(store, &iter);
+		SET_TREE_VALUE(1, "%" PRIu32, i);
 		SET_TREE_VALUE(0, "%" PRIu16, display->file->texture_combiner_combos[i]);
 	}
 	gtk_tree_view_set_model(GTK_TREE_VIEW(tree), GTK_TREE_MODEL(store));
@@ -596,18 +491,17 @@ static GtkWidget *build_texture_combiners_combos(struct m2_display *display)
 
 static GtkWidget *build_texture_unit_lookups(struct m2_display *display)
 {
-	GtkListStore *store = gtk_list_store_new(1, G_TYPE_STRING);
+	GtkListStore *store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_STRING);
 	GtkWidget *tree = gtk_tree_view_new();
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree), true);
 	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
-	GtkTreeViewColumn *column;
-	column = gtk_tree_view_column_new_with_attributes("value", renderer, "text", 0, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	gtk_tree_view_column_set_sort_column_id(column, 0);
-	for (size_t i = 0; i < display->file->texture_unit_lookups_nb; ++i)
+	ADD_TREE_COLUMN(0, "id");
+	ADD_TREE_COLUMN(1, "value");
+	for (uint32_t i = 0; i < display->file->texture_unit_lookups_nb; ++i)
 	{
 		GtkTreeIter iter;
 		gtk_list_store_append(store, &iter);
+		SET_TREE_VALUE(0, "%" PRIu32, i);
 		SET_TREE_VALUE(0, "%" PRIu16, display->file->texture_unit_lookups[i]);
 	}
 	gtk_tree_view_set_model(GTK_TREE_VIEW(tree), GTK_TREE_MODEL(store));
