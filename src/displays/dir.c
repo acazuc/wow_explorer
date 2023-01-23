@@ -5,6 +5,15 @@
 
 #include <libwow/mpq.h>
 
+#define ADD_TREE_COLUMN(id, name) \
+do \
+{ \
+	GtkTreeViewColumn *column = gtk_tree_view_column_new_with_attributes(name, renderer, "text", id, NULL); \
+	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column); \
+	gtk_tree_view_column_set_sort_column_id(column, id); \
+	gtk_tree_view_column_set_resizable(column, true); \
+} while (0)
+
 struct dir_display
 {
 	struct display display;
@@ -42,25 +51,12 @@ struct display *dir_display_new(const struct node *node, const char *path, wow_m
 	GtkWidget *tree = gtk_tree_view_new();
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree), true);
 	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
-	GtkTreeViewColumn *column;
-	column = gtk_tree_view_column_new_with_attributes("name", renderer, "text", 0, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	gtk_tree_view_column_set_sort_column_id(column, 0);
-	column = gtk_tree_view_column_new_with_attributes("offset", renderer, "text", 1, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	gtk_tree_view_column_set_sort_column_id(column, 1);
-	column = gtk_tree_view_column_new_with_attributes("block size", renderer, "text", 2, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	gtk_tree_view_column_set_sort_column_id(column, 2);
-	column = gtk_tree_view_column_new_with_attributes("file size", renderer, "text", 3, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	gtk_tree_view_column_set_sort_column_id(column, 3);
-	column = gtk_tree_view_column_new_with_attributes("compression", renderer, "text", 4, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	gtk_tree_view_column_set_sort_column_id(column, 4);
-	column = gtk_tree_view_column_new_with_attributes("flags", renderer, "text", 5, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	gtk_tree_view_column_set_sort_column_id(column, 5);
+	ADD_TREE_COLUMN(0, "name");
+	ADD_TREE_COLUMN(1, "offset");
+	ADD_TREE_COLUMN(2, "block size");
+	ADD_TREE_COLUMN(3, "file size");
+	ADD_TREE_COLUMN(4, "compression");
+	ADD_TREE_COLUMN(5, "flags");
 	for (size_t i = 0; i < node->childs.size; ++i)
 	{
 		struct node *child = *JKS_ARRAY_GET(&node->childs, i, struct node*);

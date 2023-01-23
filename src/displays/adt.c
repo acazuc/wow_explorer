@@ -7,6 +7,15 @@
 #include <inttypes.h>
 #include <stdbool.h>
 
+#define ADD_TREE_COLUMN(id, name) \
+do \
+{ \
+	GtkTreeViewColumn *column = gtk_tree_view_column_new_with_attributes(name, renderer, "text", id, NULL); \
+	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column); \
+	gtk_tree_view_column_set_sort_column_id(column, id); \
+	gtk_tree_view_column_set_resizable(column, true); \
+} while (0)
+
 #define SET_TREE_VALUE(id, fmt, ...) \
 do \
 { \
@@ -603,25 +612,12 @@ static GtkWidget *build_adt_objects(struct adt_display *display)
 	GtkWidget *tree = gtk_tree_view_new();
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree), true);
 	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
-	GtkTreeViewColumn *column;
-	column = gtk_tree_view_column_new_with_attributes("name", renderer, "text", 0, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	gtk_tree_view_column_set_sort_column_id(column, 0);
-	column = gtk_tree_view_column_new_with_attributes("id", renderer, "text", 1, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	gtk_tree_view_column_set_sort_column_id(column, 1);
-	column = gtk_tree_view_column_new_with_attributes("position", renderer, "text", 2, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	gtk_tree_view_column_set_sort_column_id(column, 2);
-	column = gtk_tree_view_column_new_with_attributes("rotation", renderer, "text", 3, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	gtk_tree_view_column_set_sort_column_id(column, 3);
-	column = gtk_tree_view_column_new_with_attributes("scale", renderer, "text", 4, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	gtk_tree_view_column_set_sort_column_id(column, 4);
-	column = gtk_tree_view_column_new_with_attributes("flags", renderer, "text", 5, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	gtk_tree_view_column_set_sort_column_id(column, 5);
+	ADD_TREE_COLUMN(0, "name");
+	ADD_TREE_COLUMN(1, "id");
+	ADD_TREE_COLUMN(2, "position");
+	ADD_TREE_COLUMN(3, "rotation");
+	ADD_TREE_COLUMN(4, "scale");
+	ADD_TREE_COLUMN(5, "flags");
 	for (size_t i = 0; i < display->file->mddf.data_nb; ++i)
 	{
 		struct wow_mddf_data *mddf = &display->file->mddf.data[i];
@@ -645,31 +641,14 @@ static GtkWidget *build_adt_wmo(struct adt_display *display)
 	GtkWidget *tree = gtk_tree_view_new();
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree), true);
 	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
-	GtkTreeViewColumn *column;
-	column = gtk_tree_view_column_new_with_attributes("name", renderer, "text", 0, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	gtk_tree_view_column_set_sort_column_id(column, 0);
-	column = gtk_tree_view_column_new_with_attributes("id", renderer, "text", 1, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	gtk_tree_view_column_set_sort_column_id(column, 1);
-	column = gtk_tree_view_column_new_with_attributes("position", renderer, "text", 2, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	gtk_tree_view_column_set_sort_column_id(column, 2);
-	column = gtk_tree_view_column_new_with_attributes("rotation", renderer, "text", 3, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	gtk_tree_view_column_set_sort_column_id(column, 3);
-	column = gtk_tree_view_column_new_with_attributes("aabb", renderer, "text", 4, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	gtk_tree_view_column_set_sort_column_id(column, 4);
-	column = gtk_tree_view_column_new_with_attributes("flags", renderer, "text", 5, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	gtk_tree_view_column_set_sort_column_id(column, 5);
-	column = gtk_tree_view_column_new_with_attributes("doodad_set", renderer, "text", 6, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	gtk_tree_view_column_set_sort_column_id(column, 6);
-	column = gtk_tree_view_column_new_with_attributes("name_set", renderer, "text", 7, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	gtk_tree_view_column_set_sort_column_id(column, 7);
+	ADD_TREE_COLUMN(0, "name");
+	ADD_TREE_COLUMN(1, "id");
+	ADD_TREE_COLUMN(2, "position");
+	ADD_TREE_COLUMN(3, "rotation");
+	ADD_TREE_COLUMN(4, "aabb");
+	ADD_TREE_COLUMN(5, "flags");
+	ADD_TREE_COLUMN(6, "doodad_set");
+	ADD_TREE_COLUMN(7, "name_set");
 	for (size_t i = 0; i < display->file->modf.data_nb; ++i)
 	{
 		struct wow_modf_data *modf = &display->file->modf.data[i];
