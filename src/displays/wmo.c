@@ -493,6 +493,30 @@ static GtkWidget *build_mods(struct wmo_display *display)
 	return tree;
 }
 
+static GtkWidget *build_modn(struct wmo_display *display)
+{
+	GtkListStore *store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_STRING);
+	GtkWidget *tree = gtk_tree_view_new();
+	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree), true);
+	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
+	ADD_TREE_COLUMN(0, "offset");
+	ADD_TREE_COLUMN(1, "name");
+	for (uint32_t i = 0; i < display->file->modn.data_len; ++i)
+	{
+		if (!display->file->modn.data[i])
+			continue;
+		char offset[32];
+		snprintf(offset, sizeof(offset), "%" PRIu32, i);
+		GtkTreeIter iter;
+		gtk_list_store_append(store, &iter);
+		gtk_list_store_set(store, &iter, 0, offset, 1, &display->file->modn.data[i], -1);
+		i += strlen(&display->file->modn.data[i]);
+	}
+	gtk_tree_view_set_model(GTK_TREE_VIEW(tree), GTK_TREE_MODEL(store));
+	gtk_widget_show(tree);
+	return tree;
+}
+
 static void on_gtk_wmo_row_activated(GtkTreeView *tree, GtkTreePath *path, GtkTreeViewColumn *column, gpointer data)
 {
 	struct wmo_display *display = data;
@@ -553,6 +577,9 @@ static void on_gtk_wmo_row_activated(GtkTreeView *tree, GtkTreePath *path, GtkTr
 			break;
 		case WMO_CATEGORY_MODS:
 			child = build_mods(display);
+			break;
+		case WMO_CATEGORY_MODN:
+			child = build_modn(display);
 			break;
 	}
 	if (child)
