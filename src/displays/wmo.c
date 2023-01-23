@@ -52,6 +52,15 @@ do \
 	gtk_list_store_set_value(store, &iter, id, &value); \
 } while (0)
 
+#define SET_TREE_VALUE_STR(id, v) \
+do \
+{ \
+	GValue value = G_VALUE_INIT; \
+	g_value_init(&value, G_TYPE_STRING); \
+	g_value_set_string(&value, v); \
+	gtk_list_store_set_value(store, &iter, id, &value); \
+} while (0)
+
 enum wmo_category
 {
 	WMO_CATEGORY_MVER = 1,
@@ -457,6 +466,33 @@ static GtkWidget *build_molt(struct wmo_display *display)
 	return tree;
 }
 
+static GtkWidget *build_mods(struct wmo_display *display)
+{
+	GtkListStore *store = gtk_list_store_new(5, G_TYPE_UINT64, G_TYPE_STRING, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_STRING);
+	GtkWidget *tree = gtk_tree_view_new();
+	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree), true);
+	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
+	ADD_TREE_COLUMN(0, "id");
+	ADD_TREE_COLUMN(1, "name");
+	ADD_TREE_COLUMN(2, "start_index");
+	ADD_TREE_COLUMN(3, "count");
+	ADD_TREE_COLUMN(4, "pad");
+	for (uint32_t i = 0; i < display->file->mods.data_nb; ++i)
+	{
+		struct wow_mods_data *mods = &display->file->mods.data[i];
+		GtkTreeIter iter;
+		gtk_list_store_append(store, &iter);
+		SET_TREE_VALUE_U64(0, i);
+		SET_TREE_VALUE_STR(1, mods->name);
+		SET_TREE_VALUE_U64(2, mods->start_index);
+		SET_TREE_VALUE_U64(3, mods->count);
+		SET_TREE_VALUE(4, "{%" PRId8 ", %" PRId8 ", %" PRId8 ", %" PRId8 "}", mods->pad[0], mods->pad[1], mods->pad[2], mods->pad[3]);
+	}
+	gtk_tree_view_set_model(GTK_TREE_VIEW(tree), GTK_TREE_MODEL(store));
+	gtk_widget_show(tree);
+	return tree;
+}
+
 static void on_gtk_wmo_row_activated(GtkTreeView *tree, GtkTreePath *path, GtkTreeViewColumn *column, gpointer data)
 {
 	struct wmo_display *display = data;
@@ -514,6 +550,9 @@ static void on_gtk_wmo_row_activated(GtkTreeView *tree, GtkTreePath *path, GtkTr
 			break;
 		case WMO_CATEGORY_MOLT:
 			child = build_molt(display);
+			break;
+		case WMO_CATEGORY_MODS:
+			child = build_mods(display);
 			break;
 	}
 	if (child)
