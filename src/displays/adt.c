@@ -16,7 +16,7 @@ do \
 	gtk_tree_view_column_set_resizable(column, true); \
 } while (0)
 
-#define SET_TREE_VALUE(id, fmt, ...) \
+#define SET_TREE_VALUE_FMT(id, fmt, ...) \
 do \
 { \
 	char tmp[256]; \
@@ -623,12 +623,12 @@ static GtkWidget *build_adt_objects(struct adt_display *display)
 		struct wow_mddf_data *mddf = &display->file->mddf.data[i];
 		GtkTreeIter iter;
 		gtk_list_store_append(store, &iter);
-		SET_TREE_VALUE(0, "%s", &display->file->mmdx.data[display->file->mmid.data[mddf->name_id]]);
-		SET_TREE_VALUE(1, "%" PRIu32, mddf->unique_id);
-		SET_TREE_VALUE(2, "{%f, %f, %f}", mddf->position.x, mddf->position.y, mddf->position.z);
-		SET_TREE_VALUE(3, "{%f, %f, %f}", mddf->rotation.x, mddf->rotation.y, mddf->rotation.z);
-		SET_TREE_VALUE(4, "0x%" PRIx16, mddf->scale);
-		SET_TREE_VALUE(5, "0x%" PRIx16, mddf->flags);
+		SET_TREE_VALUE_FMT(0, "%s", &display->file->mmdx.data[display->file->mmid.data[mddf->name_id]]);
+		SET_TREE_VALUE_FMT(1, "%" PRIu32, mddf->unique_id);
+		SET_TREE_VALUE_FMT(2, "{%f, %f, %f}", mddf->position.x, mddf->position.y, mddf->position.z);
+		SET_TREE_VALUE_FMT(3, "{%f, %f, %f}", mddf->rotation.x, mddf->rotation.y, mddf->rotation.z);
+		SET_TREE_VALUE_FMT(4, "0x%" PRIx16, mddf->scale);
+		SET_TREE_VALUE_FMT(5, "0x%" PRIx16, mddf->flags);
 	}
 	gtk_tree_view_set_model(GTK_TREE_VIEW(tree), GTK_TREE_MODEL(store));
 	gtk_widget_show(tree);
@@ -654,14 +654,14 @@ static GtkWidget *build_adt_wmo(struct adt_display *display)
 		struct wow_modf_data *modf = &display->file->modf.data[i];
 		GtkTreeIter iter;
 		gtk_list_store_append(store, &iter);
-		SET_TREE_VALUE(0, "%s", &display->file->mwmo.data[display->file->mwid.data[modf->name_id]]);
-		SET_TREE_VALUE(1, "%" PRIu32, modf->unique_id);
-		SET_TREE_VALUE(2, "{%f, %f, %f}", modf->position.x, modf->position.y, modf->position.z);
-		SET_TREE_VALUE(3, "{%f, %f, %f}", modf->rotation.x, modf->rotation.y, modf->rotation.z);
-		SET_TREE_VALUE(4, "{%f, %f, %f}, {%f, %f, %f}", modf->aabb0.x, modf->aabb0.y, modf->aabb0.z, modf->aabb1.x, modf->aabb1.y, modf->aabb1.z);
-		SET_TREE_VALUE(5, "0x%" PRIx16, modf->flags);
-		SET_TREE_VALUE(6, "%" PRIu16, modf->doodad_set);
-		SET_TREE_VALUE(7, "%" PRIu16, modf->name_set);
+		SET_TREE_VALUE_FMT(0, "%s", &display->file->mwmo.data[display->file->mwid.data[modf->name_id]]);
+		SET_TREE_VALUE_FMT(1, "%" PRIu32, modf->unique_id);
+		SET_TREE_VALUE_FMT(2, "{%f, %f, %f}", modf->position.x, modf->position.y, modf->position.z);
+		SET_TREE_VALUE_FMT(3, "{%f, %f, %f}", modf->rotation.x, modf->rotation.y, modf->rotation.z);
+		SET_TREE_VALUE_FMT(4, "{%f, %f, %f}, {%f, %f, %f}", modf->aabb0.x, modf->aabb0.y, modf->aabb0.z, modf->aabb1.x, modf->aabb1.y, modf->aabb1.z);
+		SET_TREE_VALUE_FMT(5, "0x%" PRIx16, modf->flags);
+		SET_TREE_VALUE_FMT(6, "%" PRIu16, modf->doodad_set);
+		SET_TREE_VALUE_FMT(7, "%" PRIu16, modf->name_set);
 	}
 	gtk_tree_view_set_model(GTK_TREE_VIEW(tree), GTK_TREE_MODEL(store));
 	gtk_widget_show(tree);
