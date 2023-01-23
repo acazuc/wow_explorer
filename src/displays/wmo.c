@@ -25,6 +25,24 @@ do \
 	gtk_list_store_set_value(store, &iter, id, &value); \
 } while (0)
 
+#define SET_TREE_VALUE_U64(id, v) \
+do \
+{ \
+	GValue value = G_VALUE_INIT; \
+	g_value_init(&value, G_TYPE_UINT64); \
+	g_value_set_uint64(&value, v); \
+	gtk_list_store_set_value(store, &iter, id, &value); \
+} while (0)
+
+#define SET_TREE_VALUE_FLT(id, v) \
+do \
+{ \
+	GValue value = G_VALUE_INIT; \
+	g_value_init(&value, G_TYPE_FLOAT); \
+	g_value_set_float(&value, v); \
+	gtk_list_store_set_value(store, &iter, id, &value); \
+} while (0)
+
 enum wmo_category
 {
 	WMO_CATEGORY_MVER = 1,
@@ -264,6 +282,31 @@ static GtkWidget *build_mosb(struct wmo_display *display)
 	return tree;
 }
 
+static GtkWidget *build_mopv(struct wmo_display *display)
+{
+	GtkListStore *store = gtk_list_store_new(4, G_TYPE_UINT64, G_TYPE_FLOAT, G_TYPE_FLOAT, G_TYPE_FLOAT);
+	GtkWidget *tree = gtk_tree_view_new();
+	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree), true);
+	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
+	ADD_TREE_COLUMN(0, "offset");
+	ADD_TREE_COLUMN(1, "x");
+	ADD_TREE_COLUMN(2, "y");
+	ADD_TREE_COLUMN(3, "z");
+	for (uint32_t i = 0; i < display->file->mopv.vertices_nb; ++i)
+	{
+		struct wow_vec3f *mopv = &display->file->mopv.vertices[i];
+		GtkTreeIter iter;
+		gtk_list_store_append(store, &iter);
+		SET_TREE_VALUE_U64(0, i);
+		SET_TREE_VALUE_FLT(1, mopv->x);
+		SET_TREE_VALUE_FLT(2, mopv->z);
+		SET_TREE_VALUE_FLT(3, -mopv->y);
+	}
+	gtk_tree_view_set_model(GTK_TREE_VIEW(tree), GTK_TREE_MODEL(store));
+	gtk_widget_show(tree);
+	return tree;
+}
+
 static void on_gtk_wmo_row_activated(GtkTreeView *tree, GtkTreePath *path, GtkTreeViewColumn *column, gpointer data)
 {
 	struct wmo_display *display = data;
@@ -303,6 +346,9 @@ static void on_gtk_wmo_row_activated(GtkTreeView *tree, GtkTreePath *path, GtkTr
 			break;
 		case WMO_CATEGORY_MOSB:
 			child = build_mosb(display);
+			break;
+		case WMO_CATEGORY_MOPV:
+			child = build_mopv(display);
 			break;
 	}
 	if (child)
