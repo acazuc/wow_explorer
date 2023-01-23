@@ -556,6 +556,45 @@ static GtkWidget *build_modd(struct wmo_display *display)
 	return tree;
 }
 
+static GtkWidget *build_mfog(struct wmo_display *display)
+{
+	GtkListStore *store = gtk_list_store_new(11, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_STRING, G_TYPE_FLOAT, G_TYPE_FLOAT, G_TYPE_FLOAT, G_TYPE_FLOAT, G_TYPE_STRING, G_TYPE_FLOAT, G_TYPE_FLOAT, G_TYPE_STRING);
+	GtkWidget *tree = gtk_tree_view_new();
+	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree), true);
+	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
+	ADD_TREE_COLUMN(0, "id");
+	ADD_TREE_COLUMN(1, "flags");
+	ADD_TREE_COLUMN(2, "position");
+	ADD_TREE_COLUMN(3, "small_radius");
+	ADD_TREE_COLUMN(4, "large_radius");
+	ADD_TREE_COLUMN(5, "fog_end1");
+	ADD_TREE_COLUMN(6, "fog_start1");
+	ADD_TREE_COLUMN(7, "color1");
+	ADD_TREE_COLUMN(8, "fog_end2");
+	ADD_TREE_COLUMN(9, "fog_start2");
+	ADD_TREE_COLUMN(10, "color2");
+	for (uint32_t i = 0; i < display->file->mfog.data_nb; ++i)
+	{
+		struct wow_mfog_data *mfog = &display->file->mfog.data[i];
+		GtkTreeIter iter;
+		gtk_list_store_append(store, &iter);
+		SET_TREE_VALUE_U64(0, i);
+		SET_TREE_VALUE_U64(1, mfog->flags);
+		SET_TREE_VALUE(2, "{%f, %f, %f}", mfog->pos.x, mfog->pos.z, -mfog->pos.y);
+		SET_TREE_VALUE_FLT(3, mfog->small_radius);
+		SET_TREE_VALUE_FLT(4, mfog->large_radius);
+		SET_TREE_VALUE_FLT(5, mfog->fog_end1);
+		SET_TREE_VALUE_FLT(6, mfog->fog_start1);
+		SET_TREE_VALUE(7, "{%" PRIu8 ", %" PRIu8 ", %" PRIu8 ", %" PRIu8 "}", mfog->color1.x, mfog->color1.y, mfog->color1.z, mfog->color1.w);
+		SET_TREE_VALUE_FLT(8, mfog->fog_end2);
+		SET_TREE_VALUE_FLT(9, mfog->fog_start2);
+		SET_TREE_VALUE(10, "{%" PRIu8 ", %" PRIu8 ", %" PRIu8 ", %" PRIu8 "}", mfog->color2.x, mfog->color2.y, mfog->color2.z, mfog->color2.w);
+	}
+	gtk_tree_view_set_model(GTK_TREE_VIEW(tree), GTK_TREE_MODEL(store));
+	gtk_widget_show(tree);
+	return tree;
+}
+
 static void on_gtk_wmo_row_activated(GtkTreeView *tree, GtkTreePath *path, GtkTreeViewColumn *column, gpointer data)
 {
 	struct wmo_display *display = data;
@@ -622,6 +661,9 @@ static void on_gtk_wmo_row_activated(GtkTreeView *tree, GtkTreePath *path, GtkTr
 			break;
 		case WMO_CATEGORY_MODD:
 			child = build_modd(display);
+			break;
+		case WMO_CATEGORY_MFOG:
+			child = build_mfog(display);
 			break;
 	}
 	if (child)
