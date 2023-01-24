@@ -49,7 +49,7 @@ struct display *wmo_display_new(const struct node *node, const char *path, struc
 	struct wmo_display *display = malloc(sizeof(*display));
 	if (!display)
 	{
-		fprintf(stderr, "wom display allocation failed\n");
+		fprintf(stderr, "wmo display allocation failed\n");
 		wow_wmo_file_delete(file);
 		return NULL;
 	}
