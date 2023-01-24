@@ -30,7 +30,7 @@ enum wmo_category
 struct wmo_display
 {
 	struct display display;
-	wow_wmo_file_t *file;
+	struct wow_wmo_file *file;
 };
 
 static GtkWidget *build_gtk_paned(struct wmo_display *display);
@@ -43,7 +43,7 @@ static void dtr(struct display *ptr)
 
 struct display *wmo_display_new(const struct node *node, const char *path, struct wow_mpq_file *mpq_file)
 {
-	wow_wmo_file_t *file = wow_wmo_file_new(mpq_file);
+	struct wow_wmo_file *file = wow_wmo_file_new(mpq_file);
 	if (!file)
 		return wmo_group_display_new(node, path, mpq_file);
 	struct wmo_display *display = malloc(sizeof(*display));
@@ -154,7 +154,7 @@ static GtkWidget *build_momt(struct wmo_display *display)
 	ADD_TREE_COLUMN(12, "flags2");
 	for (uint32_t i = 0; i < display->file->momt.data_nb; ++i)
 	{
-		struct wow_momt_data *momt = &display->file->momt.data[i];
+		const struct wow_momt_data *momt = &display->file->momt.data[i];
 		GtkTreeIter iter;
 		gtk_list_store_append(store, &iter);
 		SET_TREE_VALUE_U64(0, i);
@@ -212,7 +212,7 @@ static GtkWidget *build_mogi(struct wmo_display *display)
 	ADD_TREE_COLUMN(3, "name_offset");
 	for (uint32_t i = 0; i < display->file->mogi.data_nb; ++i)
 	{
-		struct wow_mogi_data *mogi = &display->file->mogi.data[i];
+		const struct wow_mogi_data *mogi = &display->file->mogi.data[i];
 		GtkTreeIter iter;
 		gtk_list_store_append(store, &iter);
 		SET_TREE_VALUE_U64(0, i);
@@ -261,7 +261,7 @@ static GtkWidget *build_mopv(struct wmo_display *display)
 	ADD_TREE_COLUMN(3, "z");
 	for (uint32_t i = 0; i < display->file->mopv.vertices_nb; ++i)
 	{
-		struct wow_vec3f *mopv = &display->file->mopv.vertices[i];
+		const struct wow_vec3f *mopv = &display->file->mopv.vertices[i];
 		GtkTreeIter iter;
 		gtk_list_store_append(store, &iter);
 		SET_TREE_VALUE_U64(0, i);
@@ -287,7 +287,7 @@ static GtkWidget *build_mopt(struct wmo_display *display)
 	ADD_TREE_COLUMN(4, "distance");
 	for (uint32_t i = 0; i < display->file->mopt.data_nb; ++i)
 	{
-		struct wow_mopt_data *mopt = &display->file->mopt.data[i];
+		const struct wow_mopt_data *mopt = &display->file->mopt.data[i];
 		GtkTreeIter iter;
 		gtk_list_store_append(store, &iter);
 		SET_TREE_VALUE_U64(0, i);
@@ -313,7 +313,7 @@ static GtkWidget *build_mopr(struct wmo_display *display)
 	ADD_TREE_COLUMN(3, "side");
 	for (uint32_t i = 0; i < display->file->mopr.data_nb; ++i)
 	{
-		struct wow_mopr_data *mopr = &display->file->mopr.data[i];
+		const struct wow_mopr_data *mopr = &display->file->mopr.data[i];
 		GtkTreeIter iter;
 		gtk_list_store_append(store, &iter);
 		SET_TREE_VALUE_U64(0, i);
@@ -338,7 +338,7 @@ static GtkWidget *build_movv(struct wmo_display *display)
 	ADD_TREE_COLUMN(3, "z");
 	for (uint32_t i = 0; i < display->file->movv.vertices_nb; ++i)
 	{
-		struct wow_vec3f *movv = &display->file->movv.vertices[i];
+		const struct wow_vec3f *movv = &display->file->movv.vertices[i];
 		GtkTreeIter iter;
 		gtk_list_store_append(store, &iter);
 		SET_TREE_VALUE_U64(0, i);
@@ -362,7 +362,7 @@ static GtkWidget *build_movb(struct wmo_display *display)
 	ADD_TREE_COLUMN(2, "count");
 	for (uint32_t i = 0; i < display->file->movb.data_nb; ++i)
 	{
-		struct wow_movb_data *movb = &display->file->movb.data[i];
+		const struct wow_movb_data *movb = &display->file->movb.data[i];
 		GtkTreeIter iter;
 		gtk_list_store_append(store, &iter);
 		SET_TREE_VALUE_U64(0, i);
@@ -392,7 +392,7 @@ static GtkWidget *build_molt(struct wmo_display *display)
 	ADD_TREE_COLUMN(9, "atten_end");
 	for (uint32_t i = 0; i < display->file->molt.data_nb; ++i)
 	{
-		struct wow_molt_data *molt = &display->file->molt.data[i];
+		const struct wow_molt_data *molt = &display->file->molt.data[i];
 		GtkTreeIter iter;
 		gtk_list_store_append(store, &iter);
 		SET_TREE_VALUE_U64(0, i);
@@ -424,7 +424,7 @@ static GtkWidget *build_mods(struct wmo_display *display)
 	ADD_TREE_COLUMN(4, "pad");
 	for (uint32_t i = 0; i < display->file->mods.data_nb; ++i)
 	{
-		struct wow_mods_data *mods = &display->file->mods.data[i];
+		const struct wow_mods_data *mods = &display->file->mods.data[i];
 		GtkTreeIter iter;
 		gtk_list_store_append(store, &iter);
 		SET_TREE_VALUE_U64(0, i);
@@ -481,7 +481,7 @@ static GtkWidget *build_modd(struct wmo_display *display)
 	ADD_TREE_COLUMN(10, "color");
 	for (uint32_t i = 0; i < display->file->modd.data_nb; ++i)
 	{
-		struct wow_modd_data *modd = &display->file->modd.data[i];
+		const struct wow_modd_data *modd = &display->file->modd.data[i];
 		GtkTreeIter iter;
 		gtk_list_store_append(store, &iter);
 		SET_TREE_VALUE_U64(0, i);
@@ -520,7 +520,7 @@ static GtkWidget *build_mfog(struct wmo_display *display)
 	ADD_TREE_COLUMN(10, "color2");
 	for (uint32_t i = 0; i < display->file->mfog.data_nb; ++i)
 	{
-		struct wow_mfog_data *mfog = &display->file->mfog.data[i];
+		const struct wow_mfog_data *mfog = &display->file->mfog.data[i];
 		GtkTreeIter iter;
 		gtk_list_store_append(store, &iter);
 		SET_TREE_VALUE_U64(0, i);

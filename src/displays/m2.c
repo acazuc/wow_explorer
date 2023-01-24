@@ -26,10 +26,10 @@ enum m2_category
 struct m2_display
 {
 	struct display display;
-	wow_m2_file_t *file;
+	struct wow_m2_file *file;
 };
 
-static GtkWidget *build_tree(struct m2_display *display, wow_m2_file_t *file);
+static GtkWidget *build_tree(struct m2_display *display, struct wow_m2_file *file);
 
 static void dtr(struct display *ptr)
 {
@@ -37,11 +37,11 @@ static void dtr(struct display *ptr)
 	wow_m2_file_delete(display->file);
 }
 
-struct display *m2_display_new(const struct node *node, const char *path, wow_mpq_file_t *mpq_file)
+struct display *m2_display_new(const struct node *node, const char *path, struct wow_mpq_file *mpq_file)
 {
 	(void)node;
 	(void)path;
-	wow_m2_file_t *file = wow_m2_file_new(mpq_file);
+	struct wow_m2_file *file = wow_m2_file_new(mpq_file);
 	if (!file)
 	{
 		fprintf(stderr, "failed to parse blp file\n");
@@ -96,7 +96,7 @@ static GtkWidget *build_main_header(struct m2_display *display)
 	return build_text_width(data);
 }
 
-static GtkWidget *build_skin_sections(wow_m2_skin_profile_t *skin_profile)
+static GtkWidget *build_skin_sections(struct wow_m2_skin_profile *skin_profile)
 {
 	GtkListStore *store = gtk_list_store_new(11, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_FLOAT);
 	GtkWidget *tree = gtk_tree_view_new();
@@ -135,7 +135,7 @@ static GtkWidget *build_skin_sections(wow_m2_skin_profile_t *skin_profile)
 	return tree;
 }
 
-static GtkWidget *build_batchs(wow_m2_skin_profile_t *skin_profile)
+static GtkWidget *build_batchs(struct wow_m2_skin_profile *skin_profile)
 {
 	GtkListStore *store = gtk_list_store_new(14, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64);
 	GtkWidget *tree = gtk_tree_view_new();
@@ -183,7 +183,7 @@ static GtkWidget *build_batchs(wow_m2_skin_profile_t *skin_profile)
 static GtkWidget *build_skin_profile(struct m2_display *display, uint32_t val)
 {
 	uint8_t profile_id = val & 0xff;
-	wow_m2_skin_profile_t *skin_profile = &display->file->skin_profiles[profile_id - 1];
+	struct wow_m2_skin_profile *skin_profile = &display->file->skin_profiles[profile_id - 1];
 	switch ((val >> 8) & 0xf)
 	{
 		case 1:
@@ -548,7 +548,7 @@ static void on_gtk_block_row_activated(GtkTreeView *tree, GtkTreePath *path, Gtk
 		gtk_container_add(GTK_CONTAINER(scrolled), child);
 }
 
-GtkWidget *build_tree(struct m2_display *display, wow_m2_file_t *file)
+GtkWidget *build_tree(struct m2_display *display, struct wow_m2_file *file)
 {
 	GtkTreeStore *store = gtk_tree_store_new(2, G_TYPE_STRING, G_TYPE_INT);
 	GtkWidget *tree = gtk_tree_view_new();

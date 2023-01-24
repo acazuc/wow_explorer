@@ -11,7 +11,7 @@
 struct adt_display
 {
 	struct display display;
-	wow_adt_file_t *file;
+	struct wow_adt_file *file;
 };
 
 static void on_gtk_block_row_activated(GtkTreeView *tree, GtkTreePath *path, GtkTreeViewColumn *column, gpointer data);
@@ -28,7 +28,7 @@ static void dtr(struct display *ptr)
 	wow_adt_file_delete(display->file);
 }
 
-struct display *adt_display_new(const struct node *node, const char *path, wow_mpq_file_t *mpq_file)
+struct display *adt_display_new(const struct node *node, const char *path, struct wow_mpq_file *mpq_file)
 {
 	(void)node;
 	(void)path;
@@ -60,7 +60,7 @@ struct display *adt_display_new(const struct node *node, const char *path, wow_m
 	     Textures
 	     Next is everything available in MCNK but generalized over all the chunks (textures, height, ...)
 	 */
-	wow_adt_file_t *file = wow_adt_file_new(mpq_file);
+	struct wow_adt_file *file = wow_adt_file_new(mpq_file);
 	if (!file)
 	{
 		fprintf(stderr, "failed to parse adt file\n");
@@ -154,8 +154,8 @@ struct display *adt_display_new(const struct node *node, const char *path, wow_m
 
 static GtkWidget *build_mcnk_layer(struct adt_display *display, uint8_t mcnk_id, uint8_t what)
 {
-	wow_mcnk_t *mcnk = &display->file->mcnk[mcnk_id];
-	wow_mcly_data_t *layer = &display->file->mcnk[mcnk_id].mcly.data[what - 1];
+	struct wow_mcnk *mcnk = &display->file->mcnk[mcnk_id];
+	struct wow_mcly_data *layer = &display->file->mcnk[mcnk_id].mcly.data[what - 1];
 	if (what > display->file->mcnk[mcnk_id].mcly.data_nb)
 		return NULL;
 	size_t scale = 5;
@@ -230,7 +230,7 @@ static GtkWidget *build_mcnk_layer(struct adt_display *display, uint8_t mcnk_id,
 
 static GtkWidget *build_mcnk_texture(struct adt_display *display, uint8_t mcnk_id)
 {
-	wow_mcnk_t *mcnk = &display->file->mcnk[mcnk_id];
+	struct wow_mcnk *mcnk = &display->file->mcnk[mcnk_id];
 	size_t scale = 5;
 	size_t width = 64 * scale;
 	size_t height = 64 * scale;
@@ -268,8 +268,8 @@ static GtkWidget *build_mcnk_texture(struct adt_display *display, uint8_t mcnk_i
 
 static GtkWidget *build_mcnk_shadow(struct adt_display *display, uint8_t mcnkId)
 {
-	wow_mcnk_t *mcnk = &display->file->mcnk[mcnkId];
-	wow_mcsh_t *mcsh = &mcnk->mcsh;
+	struct wow_mcnk *mcnk = &display->file->mcnk[mcnkId];
+	struct wow_mcsh *mcsh = &mcnk->mcsh;
 	size_t scale = 5;
 	size_t width = 64 * scale;
 	size_t height = 64 * scale;
@@ -296,8 +296,8 @@ static GtkWidget *build_mcnk_shadow(struct adt_display *display, uint8_t mcnkId)
 
 static GtkWidget *build_mcnk_height(struct adt_display *display, uint8_t mcnk_id)
 {
-	wow_mcnk_t *mcnk = &display->file->mcnk[mcnk_id];
-	wow_mcvt_t *mcvt = &mcnk->mcvt;
+	struct wow_mcnk *mcnk = &display->file->mcnk[mcnk_id];
+	struct wow_mcvt *mcvt = &mcnk->mcvt;
 	size_t scale = 5;
 	size_t width = 9 * scale;
 	size_t height = 9 * scale;
@@ -337,8 +337,8 @@ static GtkWidget *build_mcnk_height(struct adt_display *display, uint8_t mcnk_id
 
 static GtkWidget *build_mcnk_normal(struct adt_display *display, uint8_t mcnk_id)
 {
-	wow_mcnk_t *mcnk = &display->file->mcnk[mcnk_id];
-	wow_mcnr_t *mcnr = &mcnk->mcnr;
+	struct wow_mcnk *mcnk = &display->file->mcnk[mcnk_id];
+	struct wow_mcnr *mcnr = &mcnk->mcnr;
 	size_t scale = 5;
 	size_t width = 9 * scale;
 	size_t height = 9 * scale;
@@ -362,7 +362,7 @@ static GtkWidget *build_mcnk_normal(struct adt_display *display, uint8_t mcnk_id
 
 static GtkWidget *build_mcnk_holes(struct adt_display *display, uint8_t mcnk_id)
 {
-	wow_mcnk_t *mcnk = &display->file->mcnk[mcnk_id];
+	struct wow_mcnk *mcnk = &display->file->mcnk[mcnk_id];
 	uint8_t holes = mcnk->header.holes;
 	return NULL;
 }
@@ -437,7 +437,7 @@ static GtkWidget *build_adt_texture(struct adt_display *display)
 	{
 		for (size_t cx = 0; cx < 16; ++cx)
 		{
-			wow_mcnk_t *mcnk = &display->file->mcnk[cx * 16 + cy];
+			struct wow_mcnk *mcnk = &display->file->mcnk[cx * 16 + cy];
 			for (size_t l = 1; l < mcnk->header.layers; ++l)
 			{
 				if (!mcnk->mcly.data[l].flags.use_alpha_map)
@@ -480,10 +480,10 @@ static GtkWidget *build_adt_shadow(struct adt_display *display)
 	{
 		for (size_t cx = 0; cx < 16; ++cx)
 		{
-			wow_mcnk_t *mcnk = &display->file->mcnk[cx * 16 + cy];
+			struct wow_mcnk *mcnk = &display->file->mcnk[cx * 16 + cy];
 			if (mcnk->header.flags & WOW_MCNK_FLAGS_MCSH)
 			{
-				wow_mcsh_t *mcsh = &mcnk->mcsh;
+				struct wow_mcsh *mcsh = &mcnk->mcsh;
 				for (size_t y = 0; y < height / 16; ++y)
 				{
 					for (size_t x = 0; x < width / 16; ++x)
@@ -515,8 +515,8 @@ static GtkWidget *build_adt_height(struct adt_display *display)
 	{
 		for (size_t cx = 0; cx < 16; ++cx)
 		{
-			wow_mcnk_t *mcnk = &display->file->mcnk[cx * 16 + cy];
-			wow_mcvt_t *mcvt = &mcnk->mcvt;
+			struct wow_mcnk *mcnk = &display->file->mcnk[cx * 16 + cy];
+			struct wow_mcvt *mcvt = &mcnk->mcvt;
 			for (size_t y = 0; y < height / 16; ++y)
 			{
 				for (size_t x = 0; x < width / 16; ++x)
@@ -535,8 +535,8 @@ static GtkWidget *build_adt_height(struct adt_display *display)
 	{
 		for (size_t cx = 0; cx < 16; ++cx)
 		{
-			wow_mcnk_t *mcnk = &display->file->mcnk[cx * 16 + cy];
-			wow_mcvt_t *mcvt = &mcnk->mcvt;
+			struct wow_mcnk *mcnk = &display->file->mcnk[cx * 16 + cy];
+			struct wow_mcvt *mcvt = &mcnk->mcvt;
 			for (size_t y = 0; y < height / 16; ++y)
 			{
 				for (size_t x = 0; x < width / 16; ++x)
@@ -567,8 +567,8 @@ static GtkWidget *build_adt_normal(struct adt_display *display)
 	{
 		for (size_t cx = 0; cx < 16; ++cx)
 		{
-			wow_mcnk_t *mcnk = &display->file->mcnk[cx * 16 + cy];
-			wow_mcnr_t *mcnr = &mcnk->mcnr;
+			struct wow_mcnk *mcnk = &display->file->mcnk[cx * 16 + cy];
+			struct wow_mcnr *mcnr = &mcnk->mcnr;
 			for (size_t y = 0; y < height / 16; ++y)
 			{
 				for (size_t x = 0; x < width / 16; ++x)

@@ -24,7 +24,7 @@ struct display *wdt_display_new(const struct node *node, const char *path, struc
 {
 	(void)node;
 	(void)path;
-	wow_wdt_file_t *file = wow_wdt_file_new(mpq_file);
+	struct wow_wdt_file *file = wow_wdt_file_new(mpq_file);
 	if (!file)
 	{
 		fprintf(stderr, "failed to parse wdt file\n");

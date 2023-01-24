@@ -7,7 +7,7 @@ struct txt_display
 	struct display display;
 };
 
-struct display *txt_display_new(const struct node *node, const char *path, wow_mpq_file_t *file)
+struct display *txt_display_new(const struct node *node, const char *path, struct wow_mpq_file *file)
 {
 	(void)node;
 	(void)path;

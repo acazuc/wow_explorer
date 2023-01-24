@@ -104,7 +104,7 @@ static bool is_ext(const char *path, const char *ext)
 	return !strcmp(&path[len - ext_len], ext);
 }
 
-typedef struct display *(*display_ctr_t)(const struct node *node, const char *path, wow_mpq_file_t *file);
+typedef struct display *(*display_ctr_t)(const struct node *node, const char *path, struct wow_mpq_file *file);
 
 static const struct
 {
@@ -145,7 +145,7 @@ static void mpq_file_on_click(struct node *node)
 {
 	char path[512];
 	node_get_path(node, path, sizeof(path));
-	wow_mpq_file_t *file = wow_mpq_get_file(g_explorer->mpq_compound, path);
+	struct wow_mpq_file *file = wow_mpq_get_file(g_explorer->mpq_compound, path);
 	if (!file)
 		return;
 	display_ctr_t ctr = NULL;

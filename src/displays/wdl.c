@@ -23,11 +23,11 @@ static void dtr(struct display *ptr)
 	(void)ptr;
 }
 
-struct display *wdl_display_new(const struct node *node, const char *path, wow_mpq_file_t *mpq_file)
+struct display *wdl_display_new(const struct node *node, const char *path, struct wow_mpq_file *mpq_file)
 {
 	(void)node;
 	(void)path;
-	wow_wdl_file_t *file = wow_wdl_file_new(mpq_file);
+	struct wow_wdl_file *file = wow_wdl_file_new(mpq_file);
 	if (!file)
 	{
 		fprintf(stderr, "failed to parse wdl file\n");

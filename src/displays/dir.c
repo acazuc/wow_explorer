@@ -36,7 +36,7 @@ static void dtr(struct display *ptr)
 	(void)ptr;
 }
 
-struct display *dir_display_new(const struct node *node, const char *path, wow_mpq_file_t *file)
+struct display *dir_display_new(const struct node *node, const char *path, struct wow_mpq_file *file)
 {
 	(void)path;
 	(void)file;
@@ -64,7 +64,7 @@ struct display *dir_display_new(const struct node *node, const char *path, wow_m
 		char tmp[64];
 		node_get_path(child, child_path, sizeof(child_path));
 		normalize_mpq_filename(child_path, sizeof(child_path));
-		const wow_mpq_block_t *block = wow_mpq_get_block(g_explorer->mpq_compound, child_path);
+		const struct wow_mpq_block *block = wow_mpq_get_block(g_explorer->mpq_compound, child_path);
 		GtkTreeIter iter;
 		gtk_list_store_append(store, &iter);
 		GValue value = G_VALUE_INIT;

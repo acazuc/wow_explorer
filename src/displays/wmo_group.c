@@ -4,7 +4,7 @@
 
 struct wmo_group_display
 {
-	wow_wmo_group_file_t *file;
+	struct wow_wmo_group_file *file;
 };
 
 struct display *wmo_group_display_new(const struct node *node, const char *path, struct wow_mpq_file *mpq_file)

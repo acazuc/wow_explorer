@@ -7,7 +7,7 @@ struct img_display
 	struct display display;
 };
 
-struct display *img_display_new(const struct node *node, const char *path, wow_mpq_file_t *file)
+struct display *img_display_new(const struct node *node, const char *path, struct wow_mpq_file *file)
 {
 	(void)node;
 	struct img_display *display = malloc(sizeof(*display));

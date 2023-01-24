@@ -10,7 +10,7 @@
 struct bls_display
 {
 	struct display display;
-	wow_bls_file_t *file;
+	struct wow_bls_file *file;
 };
 
 static void on_gtk_block_row_activated(GtkTreeView *tree, GtkTreePath *path, GtkTreeViewColumn *column, gpointer data);
@@ -21,11 +21,11 @@ static void dtr(struct display *ptr)
 	wow_bls_file_delete(display->file);
 }
 
-struct display *bls_display_new(const struct node *node, const char *path, wow_mpq_file_t *mpq_file)
+struct display *bls_display_new(const struct node *node, const char *path, struct wow_mpq_file *mpq_file)
 {
 	(void)node;
 	(void)path;
-	wow_bls_file_t *file = wow_bls_file_new(mpq_file);
+	struct wow_bls_file *file = wow_bls_file_new(mpq_file);
 	if (!file)
 	{
 		fprintf(stderr, "failed to parse bls file\n");
@@ -109,7 +109,7 @@ struct display *bls_display_new(const struct node *node, const char *path, wow_m
 	return &display->display;
 }
 
-static GtkWidget *build_gtk_code(struct bls_display *display, const wow_bls_shader_t *shader, bool pixel, uint32_t block)
+static GtkWidget *build_gtk_code(struct bls_display *display, const struct wow_bls_shader *shader, bool pixel, uint32_t block)
 {
 	(void)display;
 	GtkTextBuffer *buffer = gtk_text_buffer_new(NULL);
@@ -195,7 +195,7 @@ static GtkWidget *build_gtk_code(struct bls_display *display, const wow_bls_shad
 	return scrolled;
 }
 
-static GtkWidget *build_gtk_params(struct bls_display *display, const wow_bls_shader_param_t *params, uint32_t params_count)
+static GtkWidget *build_gtk_params(struct bls_display *display, const struct wow_bls_shader_param *params, uint32_t params_count)
 {
 	(void)display;
 	GtkListStore *store = gtk_list_store_new(6, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
@@ -232,7 +232,7 @@ static GtkWidget *build_gtk_params(struct bls_display *display, const wow_bls_sh
 			"struct",
 			"array",
 		};
-		const wow_bls_shader_param_t *param = &params[i];
+		const struct wow_bls_shader_param *param = &params[i];
 		char binding[32];
 		char mat4[256];
 		char unk1[32];
@@ -253,7 +253,7 @@ static GtkWidget *build_gtk_params(struct bls_display *display, const wow_bls_sh
 	return scrolled;
 }
 
-static GtkWidget *build_display(struct bls_display *display, const wow_bls_shader_t *shader, bool pixel, uint32_t block)
+static GtkWidget *build_display(struct bls_display *display, const struct wow_bls_shader *shader, bool pixel, uint32_t block)
 {
 	GtkWidget *code = build_gtk_code(display, shader, pixel, block);
 	GtkWidget *consts = build_gtk_params(display, shader->consts, shader->consts_nb);

@@ -70,7 +70,7 @@ static bool setup_game_files(struct explorer *explorer)
 	{
 		char name[512];
 		snprintf(name, sizeof(name), "%s/Data/%s", explorer->game_path, files[i]);
-		wow_mpq_archive_t *archive = wow_mpq_archive_new(name);
+		struct wow_mpq_archive *archive = wow_mpq_archive_new(name);
 		if (!archive)
 		{
 			fprintf(stderr, "failed to open archive \"%s\"\n", name);
@@ -172,11 +172,11 @@ static void load_files(struct explorer *explorer)
 {
 	/* XXX create popup to diplay loading files */
 	explorer->root = mpq_dir_node_new("", NULL);
-	wow_mpq_compound_t *compound = explorer->mpq_compound;
+	struct wow_mpq_compound *compound = explorer->mpq_compound;
 	for (uint32_t i = 0; i < compound->archives_nb; ++i)
 	{
-		wow_mpq_archive_view_t *archive = &compound->archives[i];
-		wow_mpq_file_t *file = wow_mpq_get_archive_file(archive, "(listfile)");
+		struct wow_mpq_archive_view *archive = &compound->archives[i];
+		struct wow_mpq_file *file = wow_mpq_get_archive_file(archive, "(listfile)");
 		if (!file)
 		{
 			fprintf(stderr, "failed to get (listfile) in archive %s\n", archive->archive->filename);

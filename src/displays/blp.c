@@ -10,7 +10,7 @@
 struct blp_display
 {
 	struct display display;
-	wow_blp_file_t *file;
+	struct wow_blp_file *file;
 	GtkWidget *gtk_display;
 	GtkWidget *image;
 };
@@ -31,11 +31,11 @@ static void dtr(struct display *ptr)
 	wow_blp_file_delete(display->file);
 }
 
-struct display *blp_display_new(const struct node *node, const char *path, wow_mpq_file_t *mpq_file)
+struct display *blp_display_new(const struct node *node, const char *path, struct wow_mpq_file *mpq_file)
 {
 	(void)node;
 	(void)path;
-	wow_blp_file_t *file = wow_blp_file_new(mpq_file);
+	struct wow_blp_file *file = wow_blp_file_new(mpq_file);
 	if (!file)
 	{
 		fprintf(stderr, "failed to parse blp file\n");

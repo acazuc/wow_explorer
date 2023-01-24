@@ -7,10 +7,59 @@
 #include <inttypes.h>
 #include <stdbool.h>
 
+static const struct
+{
+	const char *file;
+	const struct wow_dbc_def *def;
+} defs[] =
+{
+	{"animationdata.dbc"            , wow_dbc_animation_data_def},
+	{"areapoi.dbc"                  , wow_dbc_area_poi_def},
+	{"areatable.dbc"                , wow_dbc_area_table_def},
+	{"auctionhouse.dbc"             , wow_dbc_auction_house_def},
+	{"charbaseinfo.dbc"             , wow_dbc_char_base_info_def},
+	{"charhairgeosets.dbc"          , wow_dbc_char_hair_geosets_def},
+	{"charsections.dbc"             , wow_dbc_char_sections_def},
+	{"charstartoutfit.dbc"          , wow_dbc_char_start_outfit_def},
+	{"chartitles.dbc"               , wow_dbc_char_titles_def},
+	{"characterfacialhairstyles.dbc", wow_dbc_character_facial_hair_styles_def},
+	{"chrclasses.dbc"               , wow_dbc_chr_classes_def},
+	{"chrraces.dbc"                 , wow_dbc_chr_races_def},
+	{"creaturedisplayinfo.dbc"      , wow_dbc_creature_display_info_def},
+	{"creaturedisplayinfoextra.dbc" , wow_dbc_creature_display_info_extra_def},
+	{"creaturemodeldata.dbc"        , wow_dbc_creature_model_data_def},
+	{"gameobjectdisplayinfo.dbc"    , wow_dbc_game_object_display_info_def},
+	{"groundeffecttexture.dbc"      , wow_dbc_ground_effect_texture_def},
+	{"groundeffectdoodad.dbc"       , wow_dbc_ground_effect_doodad_def},
+	{"helmetgeosetvisdata.dbc"      , wow_dbc_helmet_geoset_vis_data_def},
+	{"item.dbc"                     , wow_dbc_item_def},
+	{"itemclass.dbc"                , wow_dbc_item_class_def},
+	{"itemdisplayinfo.dbc"          , wow_dbc_item_display_info_def},
+	{"itemset.dbc"                  , wow_dbc_item_set_def},
+	{"itemsubclass.dbc"             , wow_dbc_item_sub_class_def},
+	{"lightintband.dbc"             , wow_dbc_light_int_band_def},
+	{"lightfloatband.dbc"           , wow_dbc_light_float_band_def},
+	{"map.dbc"                      , wow_dbc_map_def},
+	{"namegen.dbc"                  , wow_dbc_name_gen_def},
+	{"soundentries.dbc"             , wow_dbc_sound_entries_def},
+	{"spell.dbc"                    , wow_dbc_spell_def},
+	{"spellicon.dbc"                , wow_dbc_spell_icon_def},
+	{"talent.dbc"                   , wow_dbc_talent_def},
+	{"talenttab.dbc"                , wow_dbc_talent_tab_def},
+	{"taxinodes.dbc"                , wow_dbc_taxi_nodes_def},
+	{"taxipath.dbc"                 , wow_dbc_taxi_path_def},
+	{"taxipathnode.dbc"             , wow_dbc_taxi_path_node_def},
+	{"worldmaparea.dbc"             , wow_dbc_world_map_area_def},
+	{"worldmapcontinent.dbc"        , wow_dbc_world_map_continent_def},
+	{"worldmapoverlay.dbc"          , wow_dbc_world_map_overlay_def},
+	{"worldmaptransforms.dbc"       , wow_dbc_world_map_transforms_def},
+	{"wowerror_strings.dbc"         , wow_dbc_wow_error_strings_def},
+};
+
 struct dbc_display
 {
 	struct display display;
-	wow_dbc_file_t *file;
+	struct wow_dbc_file *file;
 };
 
 static void dtr(struct display *ptr)
@@ -19,10 +68,10 @@ static void dtr(struct display *ptr)
 	wow_dbc_file_delete(display->file);
 }
 
-struct display *dbc_display_new(const struct node *node, const char *path, wow_mpq_file_t *mpq_file)
+struct display *dbc_display_new(const struct node *node, const char *path, struct wow_mpq_file *mpq_file)
 {
 	(void)path;
-	wow_dbc_file_t *file = wow_dbc_file_new(mpq_file);
+	struct wow_dbc_file *file = wow_dbc_file_new(mpq_file);
 	if (!file)
 	{
 		fprintf(stderr, "failed to parse dbc file\n");
@@ -37,55 +86,7 @@ struct display *dbc_display_new(const struct node *node, const char *path, wow_m
 	}
 	display->display.dtr = dtr;
 	display->file = file;
-	const wow_dbc_def_t *def = NULL;
-	struct
-	{
-		const char *file;
-		const wow_dbc_def_t *def;
-	} defs[] =
-	{
-		{"animationdata.dbc"            , wow_dbc_animation_data_def},
-		{"areapoi.dbc"                  , wow_dbc_area_poi_def},
-		{"areatable.dbc"                , wow_dbc_area_table_def},
-		{"auctionhouse.dbc"             , wow_dbc_auction_house_def},
-		{"charbaseinfo.dbc"             , wow_dbc_char_base_info_def},
-		{"charhairgeosets.dbc"          , wow_dbc_char_hair_geosets_def},
-		{"charsections.dbc"             , wow_dbc_char_sections_def},
-		{"charstartoutfit.dbc"          , wow_dbc_char_start_outfit_def},
-		{"chartitles.dbc"               , wow_dbc_char_titles_def},
-		{"characterfacialhairstyles.dbc", wow_dbc_character_facial_hair_styles_def},
-		{"chrclasses.dbc"               , wow_dbc_chr_classes_def},
-		{"chrraces.dbc"                 , wow_dbc_chr_races_def},
-		{"creaturedisplayinfo.dbc"      , wow_dbc_creature_display_info_def},
-		{"creaturedisplayinfoextra.dbc" , wow_dbc_creature_display_info_extra_def},
-		{"creaturemodeldata.dbc"        , wow_dbc_creature_model_data_def},
-		{"gameobjectdisplayinfo.dbc"    , wow_dbc_game_object_display_info_def},
-		{"groundeffecttexture.dbc"      , wow_dbc_ground_effect_texture_def},
-		{"groundeffectdoodad.dbc"       , wow_dbc_ground_effect_doodad_def},
-		{"helmetgeosetvisdata.dbc"      , wow_dbc_helmet_geoset_vis_data_def},
-		{"item.dbc"                     , wow_dbc_item_def},
-		{"itemclass.dbc"                , wow_dbc_item_class_def},
-		{"itemdisplayinfo.dbc"          , wow_dbc_item_display_info_def},
-		{"itemset.dbc"                  , wow_dbc_item_set_def},
-		{"itemsubclass.dbc"             , wow_dbc_item_sub_class_def},
-		{"lightintband.dbc"             , wow_dbc_light_int_band_def},
-		{"lightfloatband.dbc"           , wow_dbc_light_float_band_def},
-		{"map.dbc"                      , wow_dbc_map_def},
-		{"namegen.dbc"                  , wow_dbc_name_gen_def},
-		{"soundentries.dbc"             , wow_dbc_sound_entries_def},
-		{"spell.dbc"                    , wow_dbc_spell_def},
-		{"spellicon.dbc"                , wow_dbc_spell_icon_def},
-		{"talent.dbc"                   , wow_dbc_talent_def},
-		{"talenttab.dbc"                , wow_dbc_talent_tab_def},
-		{"taxinodes.dbc"                , wow_dbc_taxi_nodes_def},
-		{"taxipath.dbc"                 , wow_dbc_taxi_path_def},
-		{"taxipathnode.dbc"             , wow_dbc_taxi_path_node_def},
-		{"worldmaparea.dbc"             , wow_dbc_world_map_area_def},
-		{"worldmapcontinent.dbc"        , wow_dbc_world_map_continent_def},
-		{"worldmapoverlay.dbc"          , wow_dbc_world_map_overlay_def},
-		{"worldmaptransforms.dbc"       , wow_dbc_world_map_transforms_def},
-		{"wowerror_strings.dbc"         , wow_dbc_wow_error_strings_def},
-	};
+	const struct wow_dbc_def *def = NULL;
 	for (size_t i = 0; i < sizeof(defs) / sizeof(*defs); ++i)
 	{
 		if (!strcmp(defs[i].file, node->name))
@@ -153,7 +154,7 @@ struct display *dbc_display_new(const struct node *node, const char *path, wow_m
 	{
 		GtkTreeIter iter;
 		gtk_list_store_append(store, &iter);
-		wow_dbc_row_t row = wow_dbc_get_row(file, i);
+		struct wow_dbc_row row = wow_dbc_get_row(file, i);
 		GValue value = G_VALUE_INIT;
 		g_value_init(&value, G_TYPE_STRING);
 		if (def)
