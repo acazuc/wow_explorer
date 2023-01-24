@@ -232,6 +232,39 @@ static GtkWidget *build_motv(struct wmo_group_display *display)
 	return tree;
 }
 
+static GtkWidget *build_moba(struct wmo_group_display *display)
+{
+	GtkListStore *store = gtk_list_store_new(8, G_TYPE_UINT64, G_TYPE_STRING, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64);
+	GtkWidget *tree = gtk_tree_view_new();
+	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree), true);
+	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
+	ADD_TREE_COLUMN(0, "id");
+	ADD_TREE_COLUMN(1, "aabb");
+	ADD_TREE_COLUMN(2, "start_index");
+	ADD_TREE_COLUMN(3, "count");
+	ADD_TREE_COLUMN(4, "min_index");
+	ADD_TREE_COLUMN(5, "max_index");
+	ADD_TREE_COLUMN(6, "flag_unknown");
+	ADD_TREE_COLUMN(7, "material_id");
+	for (uint32_t i = 0; i < display->file->moba.data_nb; ++i)
+	{
+		const struct wow_moba_data *moba = &display->file->moba.data[i];
+		GtkTreeIter iter;
+		gtk_list_store_append(store, &iter);
+		SET_TREE_VALUE_U64(0, i);
+		SET_TREE_VALUE_FMT(1, "{{%" PRId16 ", %" PRId16 ", %" PRId16 "}, {%" PRId16 ", %" PRId16 ", %" PRId16 "}}", moba->aabb0.x, moba->aabb0.z, -moba->aabb0.y, moba->aabb1.x, moba->aabb1.z, -moba->aabb1.y);
+		SET_TREE_VALUE_U64(2, moba->start_index);
+		SET_TREE_VALUE_U64(3, moba->count);
+		SET_TREE_VALUE_U64(4, moba->min_index);
+		SET_TREE_VALUE_U64(5, moba->max_index);
+		SET_TREE_VALUE_U64(6, moba->flag_unknown);
+		SET_TREE_VALUE_U64(7, moba->material_id);
+	}
+	gtk_tree_view_set_model(GTK_TREE_VIEW(tree), GTK_TREE_MODEL(store));
+	gtk_widget_show(tree);
+	return tree;
+}
+
 static void on_gtk_wmo_row_activated(GtkTreeView *tree, GtkTreePath *path, GtkTreeViewColumn *column, gpointer data)
 {
 	struct wmo_group_display *display = data;
@@ -271,6 +304,9 @@ static void on_gtk_wmo_row_activated(GtkTreeView *tree, GtkTreePath *path, GtkTr
 			break;
 		case WMO_GROUP_CATEGORY_MOTV:
 			child = build_motv(display);
+			break;
+		case WMO_GROUP_CATEGORY_MOBA:
+			child = build_moba(display);
 			break;
 	}
 	if (child)
