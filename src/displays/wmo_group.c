@@ -383,6 +383,12 @@ static GtkWidget *build_mocv(struct wmo_group_display *display)
 	return tree;
 }
 
+static GtkWidget *build_mliq(struct wmo_group_display *display)
+{
+	/* XXX */
+	return NULL;
+}
+
 static void on_gtk_wmo_row_activated(GtkTreeView *tree, GtkTreePath *path, GtkTreeViewColumn *column, gpointer data)
 {
 	struct wmo_group_display *display = data;
@@ -440,6 +446,9 @@ static void on_gtk_wmo_row_activated(GtkTreeView *tree, GtkTreePath *path, GtkTr
 			break;
 		case WMO_GROUP_CATEGORY_MOCV:
 			child = build_mocv(display);
+			break;
+		case WMO_GROUP_CATEGORY_MLIQ:
+			child = build_mliq(display);
 			break;
 	}
 	if (child)
