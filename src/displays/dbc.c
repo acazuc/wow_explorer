@@ -7,6 +7,27 @@
 #include <inttypes.h>
 #include <stdbool.h>
 
+#define VALUE_SET_I64(v) \
+do \
+{ \
+	g_value_init(&value, G_TYPE_INT64); \
+	g_value_set_int64(&value, v); \
+} while (0)
+
+#define VALUE_SET_U64(v) \
+do \
+{ \
+	g_value_init(&value, G_TYPE_UINT64); \
+	g_value_set_uint64(&value, v); \
+} while (0)
+
+#define VALUE_SET_FLT(v) \
+do \
+{ \
+	g_value_init(&value, G_TYPE_FLOAT); \
+	g_value_set_float(&value, v); \
+} while (0)
+
 static const struct
 {
 	const char *file;
@@ -101,7 +122,29 @@ struct display *dbc_display_new(const struct node *node, const char *path, struc
 	if (def)
 	{
 		while (def[types_nb].type != WOW_DBC_TYPE_END)
-			types[types_nb++] = G_TYPE_STRING;
+		{
+			switch (def[types_nb].type)
+			{
+				case WOW_DBC_TYPE_I8:
+				case WOW_DBC_TYPE_I16:
+				case WOW_DBC_TYPE_I32:
+				case WOW_DBC_TYPE_I64:
+					types[types_nb++] = G_TYPE_INT64;
+					break;
+				case WOW_DBC_TYPE_U8:
+				case WOW_DBC_TYPE_U16:
+				case WOW_DBC_TYPE_U32:
+				case WOW_DBC_TYPE_U64:
+					types[types_nb++] = G_TYPE_UINT64;
+					break;
+				case WOW_DBC_TYPE_FLT:
+					types[types_nb++] = G_TYPE_FLOAT;
+					break;
+				default:
+					types[types_nb++] = G_TYPE_STRING;
+					break;
+			}
+		}
 	}
 	else
 	{
@@ -155,69 +198,73 @@ struct display *dbc_display_new(const struct node *node, const char *path, struc
 		GtkTreeIter iter;
 		gtk_list_store_append(store, &iter);
 		struct wow_dbc_row row = wow_dbc_get_row(file, i);
-		GValue value = G_VALUE_INIT;
-		g_value_init(&value, G_TYPE_STRING);
 		if (def)
 		{
 			size_t j = 0;
 			for (uint32_t idx = 0; def[idx].type != WOW_DBC_TYPE_END; ++idx)
 			{
+				GValue value = G_VALUE_INIT;
 				char str[512];
 				switch (def[idx].type)
 				{
 					case WOW_DBC_TYPE_I8:
-						snprintf(str, sizeof(str), "%" PRId8, wow_dbc_get_i8(&row, j));
+						VALUE_SET_I64(wow_dbc_get_i8(&row, j));
 						j += 1;
 						break;
 					case WOW_DBC_TYPE_U8:
-						snprintf(str, sizeof(str), "%" PRIu8, wow_dbc_get_u8(&row, j));
+						VALUE_SET_U64(wow_dbc_get_u8(&row, j));
 						j += 1;
 						break;
 					case WOW_DBC_TYPE_I16:
-						snprintf(str, sizeof(str), "%" PRId16, wow_dbc_get_i16(&row, j));
+						VALUE_SET_I64(wow_dbc_get_i16(&row, j));
 						j += 2;
 						break;
 					case WOW_DBC_TYPE_U16:
-						snprintf(str, sizeof(str), "%" PRIu16, wow_dbc_get_u16(&row, j));
+						VALUE_SET_U64(wow_dbc_get_u16(&row, j));
 						j += 2;
 						break;
 					case WOW_DBC_TYPE_I32:
-						snprintf(str, sizeof(str), "%" PRId32, wow_dbc_get_i32(&row, j));
+						VALUE_SET_I64(wow_dbc_get_i32(&row, j));
 						j += 4;
 						break;
 					case WOW_DBC_TYPE_U32:
-						snprintf(str, sizeof(str), "%" PRIu32, wow_dbc_get_u32(&row, j));
+						VALUE_SET_U64(wow_dbc_get_u32(&row, j));
 						j += 4;
 						break;
 					case WOW_DBC_TYPE_I64:
-						snprintf(str, sizeof(str), "%" PRId64, wow_dbc_get_i64(&row, j));
+						VALUE_SET_I64(wow_dbc_get_i64(&row, j));
 						j += 8;
 						break;
 					case WOW_DBC_TYPE_U64:
-						snprintf(str, sizeof(str), "%" PRIu64, wow_dbc_get_u64(&row, j));
+						VALUE_SET_U64(wow_dbc_get_u64(&row, j));
 						j += 8;
 						break;
 					case WOW_DBC_TYPE_STR:
+						g_value_init(&value, G_TYPE_STRING);
 						snprintf(str, sizeof(str), "%s", wow_dbc_get_str(&row, j));
+						g_value_set_string(&value, str);
 						j += 4;
 						break;
 					case WOW_DBC_TYPE_LSTR:
+						g_value_init(&value, G_TYPE_STRING);
 						snprintf(str, sizeof(str), "%s", wow_dbc_get_str(&row, j + 8));
+						g_value_set_string(&value, str);
 						j += 4 * 17;
 						break;
 					case WOW_DBC_TYPE_FLT:
-						snprintf(str, sizeof(str), "%f", wow_dbc_get_flt(&row, j));
+						VALUE_SET_FLT(wow_dbc_get_flt(&row, j));
 						j += 4;
 						break;
 					case WOW_DBC_TYPE_END:
 						break;
 				}
-				g_value_set_string(&value, str);
 				gtk_list_store_set_value(store, &iter, idx, &value);
 			}
 		}
 		else
 		{
+			GValue value = G_VALUE_INIT;
+			g_value_init(&value, G_TYPE_STRING);
 			for (uint32_t j = 0; j < file->header.record_size / 4; ++j)
 			{
 				char str[64];
