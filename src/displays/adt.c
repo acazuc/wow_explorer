@@ -1,3 +1,4 @@
+#include "displays/table_macro.h"
 #include "displays/display.h"
 
 #include "explorer.h"
@@ -6,26 +7,6 @@
 
 #include <inttypes.h>
 #include <stdbool.h>
-
-#define ADD_TREE_COLUMN(id, name) \
-do \
-{ \
-	GtkTreeViewColumn *column = gtk_tree_view_column_new_with_attributes(name, renderer, "text", id, NULL); \
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column); \
-	gtk_tree_view_column_set_sort_column_id(column, id); \
-	gtk_tree_view_column_set_resizable(column, true); \
-} while (0)
-
-#define SET_TREE_VALUE_FMT(id, fmt, ...) \
-do \
-{ \
-	char tmp[256]; \
-	GValue value = G_VALUE_INIT; \
-	g_value_init(&value, G_TYPE_STRING); \
-	snprintf(tmp, sizeof(tmp), fmt, ##__VA_ARGS__); \
-	g_value_set_string(&value, tmp); \
-	gtk_list_store_set_value(store, &iter, id, &value); \
-} while (0)
 
 struct adt_display
 {
