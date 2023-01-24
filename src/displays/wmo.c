@@ -190,7 +190,7 @@ static GtkWidget *build_motx(struct wmo_display *display)
 
 static GtkWidget *build_momt(struct wmo_display *display)
 {
-	GtkListStore *store = gtk_list_store_new(13, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+	GtkListStore *store = gtk_list_store_new(13, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64);
 	GtkWidget *tree = gtk_tree_view_new();
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree), true);
 	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
@@ -212,19 +212,19 @@ static GtkWidget *build_momt(struct wmo_display *display)
 		struct wow_momt_data *momt = &display->file->momt.data[i];
 		GtkTreeIter iter;
 		gtk_list_store_append(store, &iter);
-		SET_TREE_VALUE_FMT(0, "%" PRIu32, i);
-		SET_TREE_VALUE_FMT(1, "%" PRIx32, momt->flags);
-		SET_TREE_VALUE_FMT(2, "%" PRIu32, momt->shader);
-		SET_TREE_VALUE_FMT(3, "%" PRIu32, momt->blend_mode);
-		SET_TREE_VALUE_FMT(4, "%" PRIu32, momt->texture1);
+		SET_TREE_VALUE_U64(0, i);
+		SET_TREE_VALUE_U64(1, momt->flags);
+		SET_TREE_VALUE_U64(2, momt->shader);
+		SET_TREE_VALUE_U64(3, momt->blend_mode);
+		SET_TREE_VALUE_U64(4, momt->texture1);
 		SET_TREE_VALUE_FMT(5, "{%" PRIu8 ", %" PRIu8 ", %" PRIu8 ", %" PRIu8 "}", momt->emissive_color.x, momt->emissive_color.y, momt->emissive_color.z, momt->emissive_color.w);
 		SET_TREE_VALUE_FMT(6, "{%" PRIu8 ", %" PRIu8 ", %" PRIu8 ", %" PRIu8 "}", momt->sidn_emissive_color.x, momt->sidn_emissive_color.y, momt->sidn_emissive_color.z, momt->sidn_emissive_color.w);
-		SET_TREE_VALUE_FMT(7, "%" PRIu32, momt->texture2);
-		SET_TREE_VALUE_FMT(8, "%" PRIu32, momt->diff_color);
-		SET_TREE_VALUE_FMT(9, "%" PRIu32, momt->group_type);
-		SET_TREE_VALUE_FMT(10, "%" PRIu32, momt->texture3);
-		SET_TREE_VALUE_FMT(11, "%" PRIu32, momt->color2);
-		SET_TREE_VALUE_FMT(12, "%" PRIu32, momt->flags2);
+		SET_TREE_VALUE_U64(7, momt->texture2);
+		SET_TREE_VALUE_U64(8, momt->diff_color);
+		SET_TREE_VALUE_U64(9, momt->group_type);
+		SET_TREE_VALUE_U64(10, momt->texture3);
+		SET_TREE_VALUE_U64(11, momt->color2);
+		SET_TREE_VALUE_U64(12, momt->flags2);
 	}
 	gtk_tree_view_set_model(GTK_TREE_VIEW(tree), GTK_TREE_MODEL(store));
 	gtk_widget_show(tree);
@@ -257,7 +257,7 @@ static GtkWidget *build_mogn(struct wmo_display *display)
 
 static GtkWidget *build_mogi(struct wmo_display *display)
 {
-	GtkListStore *store = gtk_list_store_new(4, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+	GtkListStore *store = gtk_list_store_new(4, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_STRING, G_TYPE_UINT64);
 	GtkWidget *tree = gtk_tree_view_new();
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree), true);
 	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
@@ -270,10 +270,10 @@ static GtkWidget *build_mogi(struct wmo_display *display)
 		struct wow_mogi_data *mogi = &display->file->mogi.data[i];
 		GtkTreeIter iter;
 		gtk_list_store_append(store, &iter);
-		SET_TREE_VALUE_FMT(0, "%" PRIu32, i);
-		SET_TREE_VALUE_FMT(1, "%" PRIx32, mogi->flags);
+		SET_TREE_VALUE_U64(0, i);
+		SET_TREE_VALUE_U64(1, mogi->flags);
 		SET_TREE_VALUE_FMT(2, "{%f, %f, %f}, {%f, %f, %f}", mogi->aabb0.x, mogi->aabb0.y, mogi->aabb0.z, mogi->aabb1.x, mogi->aabb1.y, mogi->aabb1.z);
-		SET_TREE_VALUE_FMT(3, "%" PRId32, mogi->name_offset);
+		SET_TREE_VALUE_I64(3, mogi->name_offset);
 	}
 	gtk_tree_view_set_model(GTK_TREE_VIEW(tree), GTK_TREE_MODEL(store));
 	gtk_widget_show(tree);
