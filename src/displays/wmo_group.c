@@ -184,6 +184,31 @@ static GtkWidget *build_movt(struct wmo_group_display *display)
 	return tree;
 }
 
+static GtkWidget *build_monr(struct wmo_group_display *display)
+{
+	GtkListStore *store = gtk_list_store_new(4, G_TYPE_UINT64, G_TYPE_FLOAT, G_TYPE_FLOAT, G_TYPE_FLOAT);
+	GtkWidget *tree = gtk_tree_view_new();
+	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree), true);
+	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
+	ADD_TREE_COLUMN(0, "id");
+	ADD_TREE_COLUMN(1, "x");
+	ADD_TREE_COLUMN(2, "y");
+	ADD_TREE_COLUMN(3, "z");
+	for (uint32_t i = 0; i < display->file->monr.normals_nb; ++i)
+	{
+		const struct wow_vec3f *monr = &display->file->monr.normals[i];
+		GtkTreeIter iter;
+		gtk_list_store_append(store, &iter);
+		SET_TREE_VALUE_U64(0, i);
+		SET_TREE_VALUE_FLT(1, monr->x);
+		SET_TREE_VALUE_FLT(2, monr->z);
+		SET_TREE_VALUE_FLT(3, -monr->y);
+	}
+	gtk_tree_view_set_model(GTK_TREE_VIEW(tree), GTK_TREE_MODEL(store));
+	gtk_widget_show(tree);
+	return tree;
+}
+
 static void on_gtk_wmo_row_activated(GtkTreeView *tree, GtkTreePath *path, GtkTreeViewColumn *column, gpointer data)
 {
 	struct wmo_group_display *display = data;
@@ -217,6 +242,9 @@ static void on_gtk_wmo_row_activated(GtkTreeView *tree, GtkTreePath *path, GtkTr
 			break;
 		case WMO_GROUP_CATEGORY_MOVT:
 			child = build_movt(display);
+			break;
+		case WMO_GROUP_CATEGORY_MONR:
+			child = build_monr(display);
 			break;
 	}
 	if (child)
