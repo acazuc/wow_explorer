@@ -3,14 +3,7 @@
 #include "explorer.h"
 #include "nodes.h"
 
-#include <libwow/dbc.h>
-#include <libwow/blp.h>
-#include <libwow/bls.h>
-#include <libwow/wdl.h>
-#include <libwow/wdt.h>
-#include <libwow/adt.h>
 #include <libwow/mpq.h>
-#include <libwow/m2.h>
 
 #include <ctype.h>
 
