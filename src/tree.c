@@ -4,6 +4,8 @@
 
 #include <libwow/mpq.h>
 
+#include <sys/stat.h>
+
 #include <ctype.h>
 
 #if 0
@@ -129,6 +131,36 @@ static void save_mpq_file(struct wow_mpq_file *file, const char *path)
 	if (fwrite(file->data, 1, file->size, fp) != file->size)
 		fprintf(stderr, "failed to write data\n");
 	fclose(fp);
+	printf("saved '%s'\n", path);
+}
+
+static void save_node(struct node *node, const char *path)
+{
+	if (node->childs.size)
+	{
+		mkdir(path, 0755); /* best effort.. */
+		for (size_t i = 0; i < node->childs.size; ++i)
+		{
+			struct node *child = *JKS_ARRAY_GET(&node->childs, i, struct node*);
+			char child_path[4096];
+			snprintf(child_path, sizeof(child_path), "%s/%s", path, child->name);
+			save_node(child, child_path);
+		}
+		return;
+	}
+	char mpq_path[4096];
+	node_get_path(node, mpq_path, sizeof(mpq_path));
+	normalize_mpq_filename(mpq_path, sizeof(mpq_path));
+	struct wow_mpq_file *file = wow_mpq_get_file(g_explorer->mpq_compound, mpq_path);
+	if (file)
+	{
+		save_mpq_file(file, path);
+		wow_mpq_file_delete(file);
+	}
+	else
+	{
+		fprintf(stderr, "failed to open mpq '%s'", mpq_path);
+	}
 }
 
 static void node_export(GtkWidget *widget, gpointer data)
@@ -137,25 +169,15 @@ static void node_export(GtkWidget *widget, gpointer data)
 	struct node *node = data;
 	GtkWidget *dialog = gtk_file_chooser_dialog_new("destination directory", GTK_WINDOW(g_explorer->window), GTK_FILE_CHOOSER_ACTION_SAVE, "Cancel", GTK_RESPONSE_CANCEL, "Save", GTK_RESPONSE_ACCEPT, NULL);
 	gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dialog), node->name);
+	gtk_file_chooser_set_create_folders(GTK_FILE_CHOOSER(dialog), TRUE);
 	gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dialog), TRUE);
+	gtk_file_chooser_set_local_only(GTK_FILE_CHOOSER(dialog), TRUE);
 	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
 	{
 		char *filename;
 		GtkFileChooser *chooser = GTK_FILE_CHOOSER(dialog);
 		filename = gtk_file_chooser_get_filename(chooser);
-		char path[4096];
-		node_get_path(node, path, sizeof(path));
-		normalize_mpq_filename(path, sizeof(path));
-		struct wow_mpq_file *file = wow_mpq_get_file(g_explorer->mpq_compound, path);
-		if (file)
-		{
-			save_mpq_file(file, filename);
-			wow_mpq_file_delete(file);
-		}
-		else
-		{
-			fprintf(stderr, "failed to open %s", path);
-		}
+		save_node(node, filename);
 		g_free(filename);
 	}
 	gtk_widget_destroy(dialog);
