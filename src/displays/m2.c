@@ -19,6 +19,7 @@ enum m2_category
 	M2_CATEGORY_PARTICLES,
 	M2_CATEGORY_TEXTURES,
 	M2_CATEGORY_CAMERAS,
+	M2_CATEGORY_CAMERA_LOOKUPS,
 	M2_CATEGORY_LIGHTS,
 	M2_CATEGORY_BONES,
 };
@@ -244,7 +245,7 @@ static GtkWidget *build_textures(struct m2_display *display)
 
 static GtkWidget *build_cameras(struct m2_display *display)
 {
-	GtkListStore *store = gtk_list_store_new(5, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_FLOAT, G_TYPE_FLOAT, G_TYPE_FLOAT);
+	GtkListStore *store = gtk_list_store_new(7, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_FLOAT, G_TYPE_FLOAT, G_TYPE_FLOAT, G_TYPE_STRING, G_TYPE_STRING);
 	GtkWidget *tree = gtk_tree_view_new();
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree), true);
 	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
@@ -253,6 +254,8 @@ static GtkWidget *build_cameras(struct m2_display *display)
 	ADD_TREE_COLUMN(2, "fov");
 	ADD_TREE_COLUMN(3, "far_clip");
 	ADD_TREE_COLUMN(4, "near_clip");
+	ADD_TREE_COLUMN(5, "position_base");
+	ADD_TREE_COLUMN(6, "target_position_base");
 	for (uint32_t i = 0; i < display->file->cameras_nb; ++i)
 	{
 		const struct wow_m2_camera *camera = &display->file->cameras[i];
@@ -263,6 +266,28 @@ static GtkWidget *build_cameras(struct m2_display *display)
 		SET_TREE_VALUE_FLT(2, camera->fov);
 		SET_TREE_VALUE_FLT(3, camera->far_clip);
 		SET_TREE_VALUE_FLT(4, camera->near_clip);
+		SET_TREE_VALUE_FMT(5, "{%f, %f, %f}", camera->position_base.x, camera->position_base.y, camera->position_base.z);
+		SET_TREE_VALUE_FMT(6, "{%f, %f, %f}", camera->target_position_base.x, camera->target_position_base.y, camera->target_position_base.z);
+	}
+	gtk_tree_view_set_model(GTK_TREE_VIEW(tree), GTK_TREE_MODEL(store));
+	gtk_widget_show(tree);
+	return tree;
+}
+
+static GtkWidget *build_camera_lookups(struct m2_display *display)
+{
+	GtkListStore *store = gtk_list_store_new(2, G_TYPE_UINT64, G_TYPE_UINT64);
+	GtkWidget *tree = gtk_tree_view_new();
+	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree), true);
+	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
+	ADD_TREE_COLUMN(0, "id");
+	ADD_TREE_COLUMN(1, "index");
+	for (uint32_t i = 0; i < display->file->camera_lookups_nb; ++i)
+	{
+		GtkTreeIter iter;
+		gtk_list_store_append(store, &iter);
+		SET_TREE_VALUE_U64(0, i);
+		SET_TREE_VALUE_U64(1, display->file->camera_lookups[i]);
 	}
 	gtk_tree_view_set_model(GTK_TREE_VIEW(tree), GTK_TREE_MODEL(store));
 	gtk_widget_show(tree);
@@ -537,6 +562,9 @@ static void on_gtk_block_row_activated(GtkTreeView *tree, GtkTreePath *path, Gtk
 		case M2_CATEGORY_CAMERAS:
 			child = build_cameras(display);
 			break;
+		case M2_CATEGORY_CAMERA_LOOKUPS:
+			child = build_camera_lookups(display);
+			break;
 		case M2_CATEGORY_LIGHTS:
 			child = build_lights(display);
 			break;
@@ -611,6 +639,8 @@ GtkWidget *build_tree(struct m2_display *display, struct wow_m2_file *file)
 	gtk_tree_store_set(store, &iter, 0, "Textures", 1, M2_CATEGORY_TEXTURES, -1);
 	gtk_tree_store_append(store, &iter, NULL);
 	gtk_tree_store_set(store, &iter, 0, "Cameras", 1, M2_CATEGORY_CAMERAS, -1);
+	gtk_tree_store_append(store, &iter, NULL);
+	gtk_tree_store_set(store, &iter, 0, "Camera lookups", 1, M2_CATEGORY_CAMERA_LOOKUPS, -1);
 	gtk_tree_store_append(store, &iter, NULL);
 	gtk_tree_store_set(store, &iter, 0, "Lights", 1, M2_CATEGORY_LIGHTS, -1);
 	gtk_tree_store_append(store, &iter, NULL);
