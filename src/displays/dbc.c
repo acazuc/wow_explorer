@@ -45,6 +45,7 @@ static const struct
 	{"charstartoutfit.dbc"          , wow_dbc_char_start_outfit_def},
 	{"chartitles.dbc"               , wow_dbc_char_titles_def},
 	{"characterfacialhairstyles.dbc", wow_dbc_character_facial_hair_styles_def},
+	{"chatprofanity.dbc"            , wow_dbc_chat_profanity_def},
 	{"chrclasses.dbc"               , wow_dbc_chr_classes_def},
 	{"chrraces.dbc"                 , wow_dbc_chr_races_def},
 	{"creaturedisplayinfo.dbc"      , wow_dbc_creature_display_info_def},
