@@ -40,6 +40,7 @@ static const struct
 	{"auctionhouse.dbc"             , wow_dbc_auction_house_def},
 	{"charbaseinfo.dbc"             , wow_dbc_char_base_info_def},
 	{"charhairgeosets.dbc"          , wow_dbc_char_hair_geosets_def},
+	{"charhairtextures.dbc"         , wow_dbc_char_hair_textures_def},
 	{"charsections.dbc"             , wow_dbc_char_sections_def},
 	{"charstartoutfit.dbc"          , wow_dbc_char_start_outfit_def},
 	{"chartitles.dbc"               , wow_dbc_char_titles_def},
