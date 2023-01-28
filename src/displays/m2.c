@@ -13,6 +13,7 @@ enum m2_category
 	M2_CATEGORY_TEXTURE_UNIT_LOOKUPS,
 	M2_CATEGORY_TEXTURE_TRANSFORMS,
 	M2_CATEGORY_TEXTURE_WEIGHTS,
+	M2_CATEGORY_TEXTURE_LOOKUPS,
 	M2_CATEGORY_SKIN_PROFILES,
 	M2_CATEGORY_MATERIALS,
 	M2_CATEGORY_SEQUENCES,
@@ -99,37 +100,39 @@ static GtkWidget *build_main_header(struct m2_display *display)
 
 static GtkWidget *build_skin_sections(struct wow_m2_skin_profile *skin_profile)
 {
-	GtkListStore *store = gtk_list_store_new(11, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_FLOAT);
+	GtkListStore *store = gtk_list_store_new(12, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_FLOAT);
 	GtkWidget *tree = gtk_tree_view_new();
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree), true);
 	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
 	ADD_TREE_COLUMN(0, "id");
-	ADD_TREE_COLUMN(1, "level");
-	ADD_TREE_COLUMN(2, "vertex_start");
-	ADD_TREE_COLUMN(3, "vertex_count");
-	ADD_TREE_COLUMN(4, "index_start");
-	ADD_TREE_COLUMN(5, "index_count");
-	ADD_TREE_COLUMN(6, "bone_count");
-	ADD_TREE_COLUMN(7, "bone_combo_index");
-	ADD_TREE_COLUMN(8, "bone_influences");
-	ADD_TREE_COLUMN(9, "center_bone_index");
-	ADD_TREE_COLUMN(10, "sort_radius");
+	ADD_TREE_COLUMN(1, "skin_section_id");
+	ADD_TREE_COLUMN(2, "level");
+	ADD_TREE_COLUMN(3, "vertex_start");
+	ADD_TREE_COLUMN(4, "vertex_count");
+	ADD_TREE_COLUMN(5, "index_start");
+	ADD_TREE_COLUMN(6, "index_count");
+	ADD_TREE_COLUMN(7, "bone_count");
+	ADD_TREE_COLUMN(8, "bone_combo_index");
+	ADD_TREE_COLUMN(9, "bone_influences");
+	ADD_TREE_COLUMN(10, "center_bone_index");
+	ADD_TREE_COLUMN(11, "sort_radius");
 	for (uint32_t i = 0; i < skin_profile->sections_nb; ++i)
 	{
 		const struct wow_m2_skin_section *section = &skin_profile->sections[i];
 		GtkTreeIter iter;
 		gtk_list_store_append(store, &iter);
 		SET_TREE_VALUE_U64(0, i);
-		SET_TREE_VALUE_U64(1, section->level);
-		SET_TREE_VALUE_U64(2, section->vertex_start);
-		SET_TREE_VALUE_U64(3, section->vertex_count);
-		SET_TREE_VALUE_U64(4, section->index_start);
-		SET_TREE_VALUE_U64(5, section->index_count);
-		SET_TREE_VALUE_U64(6, section->bone_count);
-		SET_TREE_VALUE_U64(7, section->bone_combo_index);
-		SET_TREE_VALUE_U64(8, section->bone_influences);
-		SET_TREE_VALUE_U64(9, section->center_bone_index);
-		SET_TREE_VALUE_FLT(10, section->sort_radius);
+		SET_TREE_VALUE_U64(1, section->skin_section_id);
+		SET_TREE_VALUE_U64(2, section->level);
+		SET_TREE_VALUE_U64(3, section->vertex_start);
+		SET_TREE_VALUE_U64(4, section->vertex_count);
+		SET_TREE_VALUE_U64(5, section->index_start);
+		SET_TREE_VALUE_U64(6, section->index_count);
+		SET_TREE_VALUE_U64(7, section->bone_count);
+		SET_TREE_VALUE_U64(8, section->bone_combo_index);
+		SET_TREE_VALUE_U64(9, section->bone_influences);
+		SET_TREE_VALUE_U64(10, section->center_bone_index);
+		SET_TREE_VALUE_FLT(11, section->sort_radius);
 	}
 	gtk_tree_view_set_model(GTK_TREE_VIEW(tree), GTK_TREE_MODEL(store));
 	gtk_widget_show(tree);
@@ -488,8 +491,8 @@ static GtkWidget *build_texture_combiners_combos(struct m2_display *display)
 	{
 		GtkTreeIter iter;
 		gtk_list_store_append(store, &iter);
-		SET_TREE_VALUE_U64(1, i);
-		SET_TREE_VALUE_U64(0, display->file->texture_combiner_combos[i]);
+		SET_TREE_VALUE_U64(0, i);
+		SET_TREE_VALUE_U64(1, display->file->texture_combiner_combos[i]);
 	}
 	gtk_tree_view_set_model(GTK_TREE_VIEW(tree), GTK_TREE_MODEL(store));
 	gtk_widget_show(tree);
@@ -509,7 +512,27 @@ static GtkWidget *build_texture_unit_lookups(struct m2_display *display)
 		GtkTreeIter iter;
 		gtk_list_store_append(store, &iter);
 		SET_TREE_VALUE_U64(0, i);
-		SET_TREE_VALUE_U64(0, display->file->texture_unit_lookups[i]);
+		SET_TREE_VALUE_U64(1, display->file->texture_unit_lookups[i]);
+	}
+	gtk_tree_view_set_model(GTK_TREE_VIEW(tree), GTK_TREE_MODEL(store));
+	gtk_widget_show(tree);
+	return tree;
+}
+
+static GtkWidget *build_texture_lookups(struct m2_display *display)
+{
+	GtkListStore *store = gtk_list_store_new(2, G_TYPE_UINT64, G_TYPE_UINT64);
+	GtkWidget *tree = gtk_tree_view_new();
+	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree), true);
+	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
+	ADD_TREE_COLUMN(0, "id");
+	ADD_TREE_COLUMN(1, "value");
+	for (uint32_t i = 0; i < display->file->texture_lookups_nb; ++i)
+	{
+		GtkTreeIter iter;
+		gtk_list_store_append(store, &iter);
+		SET_TREE_VALUE_U64(0, i);
+		SET_TREE_VALUE_U64(1, display->file->texture_lookups[i]);
 	}
 	gtk_tree_view_set_model(GTK_TREE_VIEW(tree), GTK_TREE_MODEL(store));
 	gtk_widget_show(tree);
@@ -543,6 +566,9 @@ static void on_gtk_block_row_activated(GtkTreeView *tree, GtkTreePath *path, Gtk
 			break;
 		case M2_CATEGORY_TEXTURE_UNIT_LOOKUPS:
 			child = build_texture_unit_lookups(display);
+			break;
+		case M2_CATEGORY_TEXTURE_LOOKUPS:
+			child = build_texture_lookups(display);
 			break;
 		case M2_CATEGORY_SKIN_PROFILES:
 			child = build_skin_profile(display, val >> 8);
@@ -594,6 +620,8 @@ GtkWidget *build_tree(struct m2_display *display, struct wow_m2_file *file)
 	gtk_tree_store_set(store, &iter, 0, "Texture combiners combos", 1, M2_CATEGORY_TEXTURE_COMBINERS_COMBOS, -1);
 	gtk_tree_store_append(store, &iter, NULL);
 	gtk_tree_store_set(store, &iter, 0, "Texture unit lookups", 1, M2_CATEGORY_TEXTURE_UNIT_LOOKUPS, -1);
+	gtk_tree_store_append(store, &iter, NULL);
+	gtk_tree_store_set(store, &iter, 0, "Texture lookups", 1, M2_CATEGORY_TEXTURE_LOOKUPS, -1);
 	gtk_tree_store_append(store, &iter, NULL);
 	gtk_tree_store_set(store, &iter, 0, "Texture transforms", 1, M2_CATEGORY_TEXTURE_TRANSFORMS, -1);
 	for (uint32_t i = 0; i < file->texture_transforms_nb; ++i)
