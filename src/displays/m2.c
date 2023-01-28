@@ -141,7 +141,7 @@ static GtkWidget *build_skin_sections(struct wow_m2_skin_profile *skin_profile)
 
 static GtkWidget *build_batchs(struct wow_m2_skin_profile *skin_profile)
 {
-	GtkListStore *store = gtk_list_store_new(14, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64);
+	GtkListStore *store = gtk_list_store_new(14, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_INT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64);
 	GtkWidget *tree = gtk_tree_view_new();
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree), true);
 	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
@@ -167,7 +167,7 @@ static GtkWidget *build_batchs(struct wow_m2_skin_profile *skin_profile)
 		SET_TREE_VALUE_U64(0, i);
 		SET_TREE_VALUE_U64(1, batch->flags);
 		SET_TREE_VALUE_U64(2, batch->priority_plane);
-		SET_TREE_VALUE_U64(3, batch->shader_id);
+		SET_TREE_VALUE_I64(3, batch->shader_id);
 		SET_TREE_VALUE_U64(4, batch->skin_section_index);
 		SET_TREE_VALUE_U64(5, batch->geoset_index);
 		SET_TREE_VALUE_U64(6, batch->color_index);
