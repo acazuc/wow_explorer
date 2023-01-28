@@ -11,7 +11,9 @@ enum m2_category
 	M2_CATEGORY_HEADER = 1,
 	M2_CATEGORY_TEXTURE_COMBINERS_COMBOS,
 	M2_CATEGORY_TEXTURE_UNIT_LOOKUPS,
+	M2_CATEGORY_TEXTURE_TRANSFORMS_LOOKUPS,
 	M2_CATEGORY_TEXTURE_TRANSFORMS,
+	M2_CATEGORY_TEXTURE_WEIGHTS_LOOKUPS,
 	M2_CATEGORY_TEXTURE_WEIGHTS,
 	M2_CATEGORY_TEXTURE_LOOKUPS,
 	M2_CATEGORY_SKIN_PROFILES,
@@ -39,6 +41,53 @@ static void dtr(struct display *ptr)
 	wow_m2_file_delete(display->file);
 }
 
+static char *generate_track_values_int16(const struct wow_m2_track *track, char *d, size_t n)
+{
+	char *s = d;
+	d[0] = '\0';
+	for (size_t i = 0; i < track->values_nb; ++i)
+	{
+		size_t ret = snprintf(d, n, "{%" PRId16 ", %" PRIu32 "}%s", ((int16_t*)track->values)[i], track->timestamps[i], (i + 1) < track->values_nb ? ", " : "");
+		if (ret >= n)
+			break;
+		d += ret;
+		n -= ret;
+	}
+	return s;
+}
+
+static char *generate_track_values_vec3f(const struct wow_m2_track *track, char *d, size_t n)
+{
+	char *s = d;
+	d[0] = '\0';
+	for (size_t i = 0; i < track->values_nb; ++i)
+	{
+		struct wow_vec3f *v = &((struct wow_vec3f*)track->values)[i];
+		size_t ret = snprintf(d, n, "{{%f, %f, %f}, %" PRIu32 "}%s", v->x, v->y, v->z, track->timestamps[i], (i + 1) < track->values_nb ? ", " : "");
+		if (ret >= n)
+			break;
+		d += ret;
+		n -= ret;
+	}
+	return s;
+}
+
+static char *generate_track_values_quatf(const struct wow_m2_track *track, char *d, size_t n)
+{
+	char *s = d;
+	d[0] = '\0';
+	for (size_t i = 0; i < track->values_nb; ++i)
+	{
+		struct wow_quaternion_float *v = &((struct wow_quaternion_float*)track->values)[i];
+		size_t ret = snprintf(d, n, "{{%f, %f, %f, %f}, %" PRIu32 "}%s", v->x, v->y, v->z, v->w, track->timestamps[i], (i + 1) < track->values_nb ? ", " : "");
+		if (ret >= n)
+			break;
+		d += ret;
+		n -= ret;
+	}
+	return s;
+}
+
 struct display *m2_display_new(const struct node *node, const char *path, struct wow_mpq_file *mpq_file)
 {
 	(void)node;
@@ -46,7 +95,7 @@ struct display *m2_display_new(const struct node *node, const char *path, struct
 	struct wow_m2_file *file = wow_m2_file_new(mpq_file);
 	if (!file)
 	{
-		fprintf(stderr, "failed to parse blp file\n");
+		fprintf(stderr, "failed to parse m2 file\n");
 		return NULL;
 	}
 	struct m2_display *display = malloc(sizeof(*display));
@@ -539,6 +588,124 @@ static GtkWidget *build_texture_lookups(struct m2_display *display)
 	return tree;
 }
 
+static GtkWidget *build_texture_weights_lookups(struct m2_display *display)
+{
+	GtkListStore *store = gtk_list_store_new(2, G_TYPE_UINT64, G_TYPE_UINT64);
+	GtkWidget *tree = gtk_tree_view_new();
+	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree), true);
+	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
+	ADD_TREE_COLUMN(0, "id");
+	ADD_TREE_COLUMN(1, "value");
+	for (uint32_t i = 0; i < display->file->texture_weights_lookups_nb; ++i)
+	{
+		GtkTreeIter iter;
+		gtk_list_store_append(store, &iter);
+		SET_TREE_VALUE_U64(0, i);
+		SET_TREE_VALUE_U64(1, display->file->texture_weights_lookups[i]);
+	}
+	gtk_tree_view_set_model(GTK_TREE_VIEW(tree), GTK_TREE_MODEL(store));
+	gtk_widget_show(tree);
+	return tree;
+}
+
+static GtkWidget *build_texture_weights(struct m2_display *display)
+{
+	GtkListStore *store = gtk_list_store_new(6, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_INT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_STRING);
+	GtkWidget *tree = gtk_tree_view_new();
+	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree), true);
+	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
+	ADD_TREE_COLUMN(0, "id");
+	ADD_TREE_COLUMN(1, "interpolation_type");
+	ADD_TREE_COLUMN(2, "global_sequence");
+	ADD_TREE_COLUMN(3, "values_nb");
+	ADD_TREE_COLUMN(4, "timestamps_nb");
+	ADD_TREE_COLUMN(5, "values");
+	for (uint32_t i = 0; i < display->file->texture_weights_nb; ++i)
+	{
+		const struct wow_m2_track *weight = &display->file->texture_weights[i].weight;
+		GtkTreeIter iter;
+		gtk_list_store_append(store, &iter);
+		char data[4096];
+		SET_TREE_VALUE_U64(0, i);
+		SET_TREE_VALUE_U64(1, weight->interpolation_type);
+		SET_TREE_VALUE_I64(2, weight->global_sequence);
+		SET_TREE_VALUE_U64(3, weight->values_nb);
+		SET_TREE_VALUE_U64(4, weight->timestamps_nb);
+		SET_TREE_VALUE_STR(5, generate_track_values_int16(weight, data, sizeof(data)));
+	}
+	gtk_tree_view_set_model(GTK_TREE_VIEW(tree), GTK_TREE_MODEL(store));
+	gtk_widget_show(tree);
+	return tree;
+}
+
+static GtkWidget *build_texture_transforms_lookups(struct m2_display *display)
+{
+	GtkListStore *store = gtk_list_store_new(2, G_TYPE_UINT64, G_TYPE_UINT64);
+	GtkWidget *tree = gtk_tree_view_new();
+	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree), true);
+	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
+	ADD_TREE_COLUMN(0, "id");
+	ADD_TREE_COLUMN(1, "value");
+	for (uint32_t i = 0; i < display->file->texture_transforms_lookups_nb; ++i)
+	{
+		GtkTreeIter iter;
+		gtk_list_store_append(store, &iter);
+		SET_TREE_VALUE_U64(0, i);
+		SET_TREE_VALUE_U64(1, display->file->texture_transforms_lookups[i]);
+	}
+	gtk_tree_view_set_model(GTK_TREE_VIEW(tree), GTK_TREE_MODEL(store));
+	gtk_widget_show(tree);
+	return tree;
+}
+
+static GtkWidget *build_texture_transforms(struct m2_display *display)
+{
+	GtkListStore *store = gtk_list_store_new(7, G_TYPE_UINT64, G_TYPE_STRING, G_TYPE_UINT64, G_TYPE_INT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_STRING);
+	GtkWidget *tree = gtk_tree_view_new();
+	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree), true);
+	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
+	ADD_TREE_COLUMN(0, "id");
+	ADD_TREE_COLUMN(1, "type");
+	ADD_TREE_COLUMN(2, "interpolation_type");
+	ADD_TREE_COLUMN(3, "global_sequence");
+	ADD_TREE_COLUMN(4, "values_nb");
+	ADD_TREE_COLUMN(5, "timestamps_nb");
+	ADD_TREE_COLUMN(6, "values");
+	for (uint32_t i = 0; i < display->file->texture_transforms_nb; ++i)
+	{
+		const struct wow_m2_texture_transform *transform = &display->file->texture_transforms[i];
+		GtkTreeIter iter;
+		gtk_list_store_append(store, &iter);
+		char data[4096];
+		SET_TREE_VALUE_U64(0, i);
+		SET_TREE_VALUE_STR(1, "translation");
+		SET_TREE_VALUE_U64(2, transform->translation.interpolation_type);
+		SET_TREE_VALUE_I64(3, transform->translation.global_sequence);
+		SET_TREE_VALUE_U64(4, transform->translation.values_nb);
+		SET_TREE_VALUE_U64(5, transform->translation.timestamps_nb);
+		SET_TREE_VALUE_STR(6, generate_track_values_vec3f(&transform->translation, data, sizeof(data)));
+		gtk_list_store_append(store, &iter);
+		SET_TREE_VALUE_U64(0, i);
+		SET_TREE_VALUE_STR(1, "rotation");
+		SET_TREE_VALUE_U64(2, transform->rotation.interpolation_type);
+		SET_TREE_VALUE_I64(3, transform->rotation.global_sequence);
+		SET_TREE_VALUE_U64(4, transform->rotation.values_nb);
+		SET_TREE_VALUE_U64(5, transform->rotation.timestamps_nb);
+		SET_TREE_VALUE_STR(6, generate_track_values_quatf(&transform->rotation, data, sizeof(data)));
+		gtk_list_store_append(store, &iter);
+		SET_TREE_VALUE_U64(0, i);
+		SET_TREE_VALUE_STR(1, "scaling");
+		SET_TREE_VALUE_U64(2, transform->scaling.interpolation_type);
+		SET_TREE_VALUE_I64(3, transform->scaling.global_sequence);
+		SET_TREE_VALUE_U64(4, transform->scaling.values_nb);
+		SET_TREE_VALUE_U64(5, transform->scaling.timestamps_nb);
+		SET_TREE_VALUE_STR(6, generate_track_values_vec3f(&transform->scaling, data, sizeof(data)));
+	}
+	gtk_tree_view_set_model(GTK_TREE_VIEW(tree), GTK_TREE_MODEL(store));
+	gtk_widget_show(tree);
+	return tree;
+}
+
 static void on_gtk_block_row_activated(GtkTreeView *tree, GtkTreePath *path, GtkTreeViewColumn *column, gpointer data)
 {
 	struct m2_display *display = data;
@@ -569,6 +736,18 @@ static void on_gtk_block_row_activated(GtkTreeView *tree, GtkTreePath *path, Gtk
 			break;
 		case M2_CATEGORY_TEXTURE_LOOKUPS:
 			child = build_texture_lookups(display);
+			break;
+		case M2_CATEGORY_TEXTURE_TRANSFORMS_LOOKUPS:
+			child = build_texture_transforms_lookups(display);
+			break;
+		case M2_CATEGORY_TEXTURE_TRANSFORMS:
+			child = build_texture_transforms(display);
+			break;
+		case M2_CATEGORY_TEXTURE_WEIGHTS_LOOKUPS:
+			child = build_texture_weights_lookups(display);
+			break;
+		case M2_CATEGORY_TEXTURE_WEIGHTS:
+			child = build_texture_weights(display);
 			break;
 		case M2_CATEGORY_SKIN_PROFILES:
 			child = build_skin_profile(display, val >> 8);
@@ -623,25 +802,13 @@ GtkWidget *build_tree(struct m2_display *display, struct wow_m2_file *file)
 	gtk_tree_store_append(store, &iter, NULL);
 	gtk_tree_store_set(store, &iter, 0, "Texture lookups", 1, M2_CATEGORY_TEXTURE_LOOKUPS, -1);
 	gtk_tree_store_append(store, &iter, NULL);
+	gtk_tree_store_set(store, &iter, 0, "Texture transforms lookups", 1, M2_CATEGORY_TEXTURE_TRANSFORMS_LOOKUPS, -1);
+	gtk_tree_store_append(store, &iter, NULL);
 	gtk_tree_store_set(store, &iter, 0, "Texture transforms", 1, M2_CATEGORY_TEXTURE_TRANSFORMS, -1);
-	for (uint32_t i = 0; i < file->texture_transforms_nb; ++i)
-	{
-		GtkTreeIter child;
-		char name[14];
-		snprintf(name, sizeof(name), "%" PRIu32, i + 1);
-		gtk_tree_store_append(store, &child, &iter);
-		gtk_tree_store_set(store, &child, 0, name, 1, M2_CATEGORY_TEXTURE_TRANSFORMS + 0x100 * (i + 1), -1);
-	}
+	gtk_tree_store_append(store, &iter, NULL);
+	gtk_tree_store_set(store, &iter, 0, "Texture weights lookups", 1, M2_CATEGORY_TEXTURE_WEIGHTS_LOOKUPS, -1);
 	gtk_tree_store_append(store, &iter, NULL);
 	gtk_tree_store_set(store, &iter, 0, "Texture weights", 1, M2_CATEGORY_TEXTURE_WEIGHTS, -1);
-	for (uint32_t i = 0; i < file->texture_weights_nb; ++i)
-	{
-		GtkTreeIter child;
-		char name[14];
-		snprintf(name, sizeof(name), "%" PRIu32, i + 1);
-		gtk_tree_store_append(store, &child, &iter);
-		gtk_tree_store_set(store, &child, 0, name, 1, M2_CATEGORY_TEXTURE_WEIGHTS + 0x100 * (i + 1), -1);
-	}
 	gtk_tree_store_append(store, &iter, NULL);
 	gtk_tree_store_set(store, &iter, 0, "Skin profiles", 1, M2_CATEGORY_SKIN_PROFILES, -1);
 	for (uint32_t i = 0; i < file->skin_profiles_nb; ++i)
