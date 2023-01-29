@@ -78,7 +78,7 @@ static char *generate_track_values_quatf(const struct wow_m2_track *track, char 
 	d[0] = '\0';
 	for (size_t i = 0; i < track->values_nb; ++i)
 	{
-		struct wow_quaternion_float *v = &((struct wow_quaternion_float*)track->values)[i];
+		struct wow_quatf *v = &((struct wow_quatf*)track->values)[i];
 		size_t ret = snprintf(d, n, "{{%f, %f, %f, %f}, %" PRIu32 "}%s", v->x, v->y, v->z, v->w, track->timestamps[i], (i + 1) < track->values_nb ? ", " : "");
 		if (ret >= n)
 			break;
