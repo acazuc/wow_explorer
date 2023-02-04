@@ -23,6 +23,7 @@ enum m2_category
 	M2_CATEGORY_TEXTURES,
 	M2_CATEGORY_CAMERAS,
 	M2_CATEGORY_CAMERA_LOOKUPS,
+	M2_CATEGORY_RIBBONS,
 	M2_CATEGORY_LIGHTS,
 	M2_CATEGORY_BONES,
 };
@@ -779,6 +780,41 @@ static GtkWidget *build_texture_transforms(struct m2_display *display)
 	return tree;
 }
 
+static GtkWidget *build_ribbons(struct m2_display *display)
+{
+	GtkListStore *store = gtk_list_store_new(9, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_STRING, G_TYPE_FLOAT, G_TYPE_FLOAT, G_TYPE_FLOAT, G_TYPE_UINT64, G_TYPE_UINT64);
+	GtkWidget *tree = gtk_tree_view_new();
+	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree), true);
+	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
+	ADD_TREE_COLUMN(0, "id");
+	ADD_TREE_COLUMN(1, "ribbon");
+	ADD_TREE_COLUMN(2, "bone");
+	ADD_TREE_COLUMN(3, "position");
+	ADD_TREE_COLUMN(4, "edges_per_second");
+	ADD_TREE_COLUMN(5, "edge_lifetime");
+	ADD_TREE_COLUMN(6, "gravity");
+	ADD_TREE_COLUMN(7, "texture_rows");
+	ADD_TREE_COLUMN(8, "texture_cols");
+	for (uint32_t i = 0; i < display->file->ribbons_nb; ++i)
+	{
+		const struct wow_m2_ribbon *ribbon = &display->file->ribbons[i];
+		GtkTreeIter iter;
+		gtk_list_store_append(store, &iter);
+		SET_TREE_VALUE_U64(0, i);
+		SET_TREE_VALUE_U64(1, ribbon->ribbon_id);
+		SET_TREE_VALUE_U64(2, ribbon->bone_index);
+		SET_TREE_VALUE_FMT(3, "{%f, %f, %f}", ribbon->position.x, ribbon->position.y, ribbon->position.z);
+		SET_TREE_VALUE_FLT(4, ribbon->edges_per_second);
+		SET_TREE_VALUE_FLT(5, ribbon->edge_lifetime);
+		SET_TREE_VALUE_FLT(6, ribbon->gravity);
+		SET_TREE_VALUE_U64(7, ribbon->texture_rows);
+		SET_TREE_VALUE_U64(8, ribbon->texture_cols);
+	}
+	gtk_tree_view_set_model(GTK_TREE_VIEW(tree), GTK_TREE_MODEL(store));
+	gtk_widget_show(tree);
+	return tree;
+}
+
 static void on_gtk_block_row_activated(GtkTreeView *tree, GtkTreePath *path, GtkTreeViewColumn *column, gpointer data)
 {
 	struct m2_display *display = data;
@@ -842,6 +878,9 @@ static void on_gtk_block_row_activated(GtkTreeView *tree, GtkTreePath *path, Gtk
 			break;
 		case M2_CATEGORY_CAMERA_LOOKUPS:
 			child = build_camera_lookups(display);
+			break;
+		case M2_CATEGORY_RIBBONS:
+			child = build_ribbons(display);
 			break;
 		case M2_CATEGORY_LIGHTS:
 			child = build_lights(display);
@@ -915,6 +954,8 @@ GtkWidget *build_tree(struct m2_display *display, struct wow_m2_file *file)
 	gtk_tree_store_set(store, &iter, 0, "Cameras", 1, M2_CATEGORY_CAMERAS, -1);
 	gtk_tree_store_append(store, &iter, NULL);
 	gtk_tree_store_set(store, &iter, 0, "Camera lookups", 1, M2_CATEGORY_CAMERA_LOOKUPS, -1);
+	gtk_tree_store_append(store, &iter, NULL);
+	gtk_tree_store_set(store, &iter, 0, "Ribbons", 1, M2_CATEGORY_RIBBONS, -1);
 	gtk_tree_store_append(store, &iter, NULL);
 	gtk_tree_store_set(store, &iter, 0, "Lights", 1, M2_CATEGORY_LIGHTS, -1);
 	gtk_tree_store_append(store, &iter, NULL);
