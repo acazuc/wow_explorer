@@ -147,7 +147,7 @@ static GtkWidget *build_main_header(struct m2_display *display)
 	return build_text_width(data);
 }
 
-static GtkWidget *build_skin_sections(struct wow_m2_skin_profile *skin_profile)
+static GtkWidget *build_profile_sections(struct wow_m2_skin_profile *skin_profile)
 {
 	GtkListStore *store = gtk_list_store_new(12, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_FLOAT);
 	GtkWidget *tree = gtk_tree_view_new();
@@ -188,7 +188,7 @@ static GtkWidget *build_skin_sections(struct wow_m2_skin_profile *skin_profile)
 	return tree;
 }
 
-static GtkWidget *build_batchs(struct wow_m2_skin_profile *skin_profile)
+static GtkWidget *build_profile_batchs(struct wow_m2_skin_profile *skin_profile)
 {
 	GtkListStore *store = gtk_list_store_new(14, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_INT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64);
 	GtkWidget *tree = gtk_tree_view_new();
@@ -233,6 +233,73 @@ static GtkWidget *build_batchs(struct wow_m2_skin_profile *skin_profile)
 	return tree;
 }
 
+static GtkWidget *build_profile_vertexes(struct wow_m2_skin_profile *skin_profile)
+{
+	GtkListStore *store = gtk_list_store_new(2, G_TYPE_UINT64, G_TYPE_UINT64);
+	GtkWidget *tree = gtk_tree_view_new();
+	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree), true);
+	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
+	ADD_TREE_COLUMN(0, "id");
+	ADD_TREE_COLUMN(1, "vertex");
+	for (uint32_t i = 0; i < skin_profile->vertexes_nb; ++i)
+	{
+		GtkTreeIter iter;
+		gtk_list_store_append(store, &iter);
+		SET_TREE_VALUE_U64(0, i);
+		SET_TREE_VALUE_U64(1, skin_profile->vertexes[i]);
+	}
+	gtk_tree_view_set_model(GTK_TREE_VIEW(tree), GTK_TREE_MODEL(store));
+	gtk_widget_show(tree);
+	return tree;
+}
+
+static GtkWidget *build_profile_indices(struct wow_m2_skin_profile *skin_profile)
+{
+	GtkListStore *store = gtk_list_store_new(2, G_TYPE_UINT64, G_TYPE_UINT64);
+	GtkWidget *tree = gtk_tree_view_new();
+	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree), true);
+	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
+	ADD_TREE_COLUMN(0, "id");
+	ADD_TREE_COLUMN(1, "indice");
+	for (uint32_t i = 0; i < skin_profile->indices_nb; ++i)
+	{
+		GtkTreeIter iter;
+		gtk_list_store_append(store, &iter);
+		SET_TREE_VALUE_U64(0, i);
+		SET_TREE_VALUE_U64(1, skin_profile->indices[i]);
+	}
+	gtk_tree_view_set_model(GTK_TREE_VIEW(tree), GTK_TREE_MODEL(store));
+	gtk_widget_show(tree);
+	return tree;
+}
+
+static GtkWidget *build_profile_bones(struct wow_m2_skin_profile *skin_profile)
+{
+	GtkListStore *store = gtk_list_store_new(5, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64);
+	GtkWidget *tree = gtk_tree_view_new();
+	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree), true);
+	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
+	ADD_TREE_COLUMN(0, "id");
+	ADD_TREE_COLUMN(1, "bone1");
+	ADD_TREE_COLUMN(2, "bone2");
+	ADD_TREE_COLUMN(3, "bone3");
+	ADD_TREE_COLUMN(4, "bone4");
+	for (uint32_t i = 0; i < skin_profile->vertexes_nb; ++i)
+	{
+		struct wow_m2_skin_profile_bone *bone = &skin_profile->bones[i];
+		GtkTreeIter iter;
+		gtk_list_store_append(store, &iter);
+		SET_TREE_VALUE_U64(0, i);
+		SET_TREE_VALUE_U64(1, bone->values[0]);
+		SET_TREE_VALUE_U64(2, bone->values[1]);
+		SET_TREE_VALUE_U64(3, bone->values[2]);
+		SET_TREE_VALUE_U64(4, bone->values[3]);
+	}
+	gtk_tree_view_set_model(GTK_TREE_VIEW(tree), GTK_TREE_MODEL(store));
+	gtk_widget_show(tree);
+	return tree;
+}
+
 static GtkWidget *build_skin_profile(struct m2_display *display, uint32_t val)
 {
 	uint8_t profile_id = val & 0xff;
@@ -240,9 +307,15 @@ static GtkWidget *build_skin_profile(struct m2_display *display, uint32_t val)
 	switch ((val >> 8) & 0xf)
 	{
 		case 1:
-			return build_skin_sections(skin_profile);
+			return build_profile_sections(skin_profile);
 		case 2:
-			return build_batchs(skin_profile);
+			return build_profile_batchs(skin_profile);
+		case 3:
+			return build_profile_vertexes(skin_profile);
+		case 4:
+			return build_profile_indices(skin_profile);
+		case 5:
+			return build_profile_bones(skin_profile);
 	}
 	return NULL;
 }
@@ -823,6 +896,12 @@ GtkWidget *build_tree(struct m2_display *display, struct wow_m2_file *file)
 		gtk_tree_store_set(store, &child2, 0, "Sections", 1, M2_CATEGORY_SKIN_PROFILES + 0x100 * (i + 1) + 0x10000, -1);
 		gtk_tree_store_append(store, &child2, &child);
 		gtk_tree_store_set(store, &child2, 0, "Batches", 1, M2_CATEGORY_SKIN_PROFILES + 0x100 * (i + 1) + 0x20000, -1);
+		gtk_tree_store_append(store, &child2, &child);
+		gtk_tree_store_set(store, &child2, 0, "Vertexes", 1, M2_CATEGORY_SKIN_PROFILES + 0x100 * (i + 1) + 0x30000, -1);
+		gtk_tree_store_append(store, &child2, &child);
+		gtk_tree_store_set(store, &child2, 0, "Indices", 1, M2_CATEGORY_SKIN_PROFILES + 0x100 * (i + 1) + 0x40000, -1);
+		gtk_tree_store_append(store, &child2, &child);
+		gtk_tree_store_set(store, &child2, 0, "Bones", 1, M2_CATEGORY_SKIN_PROFILES + 0x100 * (i + 1) + 0x50000, -1);
 	}
 	gtk_tree_store_append(store, &iter, NULL);
 	gtk_tree_store_set(store, &iter, 0, "Materials", 1, M2_CATEGORY_MATERIALS, -1);
