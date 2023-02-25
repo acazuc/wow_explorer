@@ -464,37 +464,43 @@ static GtkWidget *build_modn(struct wmo_display *display)
 
 static GtkWidget *build_modd(struct wmo_display *display)
 {
-	GtkListStore *store = gtk_list_store_new(11, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_UINT64, G_TYPE_STRING);
+	GtkListStore *store = gtk_list_store_new(14, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_FLOAT, G_TYPE_STRING);
 	GtkWidget *tree = gtk_tree_view_new();
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree), true);
 	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
 	ADD_TREE_COLUMN(0, "id");
 	ADD_TREE_COLUMN(1, "name_index");
-	ADD_TREE_COLUMN(2, "accept_proj_tex");
-	ADD_TREE_COLUMN(3, "flag_0x2");
-	ADD_TREE_COLUMN(4, "flag_0x4");
-	ADD_TREE_COLUMN(5, "flag_0x8");
-	ADD_TREE_COLUMN(6, "padding");
-	ADD_TREE_COLUMN(7, "position");
-	ADD_TREE_COLUMN(8, "rotation");
-	ADD_TREE_COLUMN(9, "scale");
-	ADD_TREE_COLUMN(10, "color");
+	ADD_TREE_COLUMN(2, "flag_1");
+	ADD_TREE_COLUMN(3, "flag_2");
+	ADD_TREE_COLUMN(4, "flag_3");
+	ADD_TREE_COLUMN(5, "flag_4");
+	ADD_TREE_COLUMN(6, "flag_5");
+	ADD_TREE_COLUMN(7, "flag_6");
+	ADD_TREE_COLUMN(8, "flag_7");
+	ADD_TREE_COLUMN(9, "flag_8");
+	ADD_TREE_COLUMN(10, "position");
+	ADD_TREE_COLUMN(11, "rotation");
+	ADD_TREE_COLUMN(12, "scale");
+	ADD_TREE_COLUMN(13, "color");
 	for (uint32_t i = 0; i < display->file->modd.data_nb; ++i)
 	{
 		const struct wow_modd_data *modd = &display->file->modd.data[i];
 		GtkTreeIter iter;
 		gtk_list_store_append(store, &iter);
 		SET_TREE_VALUE_U64(0, i);
-		SET_TREE_VALUE_U64(1, modd->name_index);
-		SET_TREE_VALUE_U64(2, modd->flag_accept_proj_tex);
-		SET_TREE_VALUE_U64(3, modd->flag_0x2);
-		SET_TREE_VALUE_U64(4, modd->flag_0x4);
-		SET_TREE_VALUE_U64(5, modd->flag_0x8);
-		SET_TREE_VALUE_U64(6, modd->padding);
-		SET_TREE_VALUE_FMT(7, "{%f, %f, %f}", modd->position.x, modd->position.z, -modd->position.y);
-		SET_TREE_VALUE_FMT(8, "{%f, %f, %f, %f}", modd->rotation.x, modd->rotation.y, modd->rotation.z, modd->rotation.w);
-		SET_TREE_VALUE_FLT(9, modd->scale);
-		SET_TREE_VALUE_FMT(10, "{%" PRIu8 ", %" PRIu8 ", %" PRIu8 ", %" PRIu8 "}", modd->color.x, modd->color.y, modd->color.z, modd->color.w);
+		SET_TREE_VALUE_U64(1, modd->name_flags & WOW_MODD_NAME_MASK);
+		SET_TREE_VALUE_U64(2, modd->name_flags & WOW_MODD_FLAG_1);
+		SET_TREE_VALUE_U64(3, modd->name_flags & WOW_MODD_FLAG_2);
+		SET_TREE_VALUE_U64(4, modd->name_flags & WOW_MODD_FLAG_3);
+		SET_TREE_VALUE_U64(5, modd->name_flags & WOW_MODD_FLAG_4);
+		SET_TREE_VALUE_U64(6, modd->name_flags & WOW_MODD_FLAG_5);
+		SET_TREE_VALUE_U64(7, modd->name_flags & WOW_MODD_FLAG_6);
+		SET_TREE_VALUE_U64(8, modd->name_flags & WOW_MODD_FLAG_7);
+		SET_TREE_VALUE_U64(9, modd->name_flags & WOW_MODD_FLAG_8);
+		SET_TREE_VALUE_FMT(10, "{%f, %f, %f}", modd->position.x, modd->position.z, -modd->position.y);
+		SET_TREE_VALUE_FMT(11, "{%f, %f, %f, %f}", modd->rotation.x, modd->rotation.y, modd->rotation.z, modd->rotation.w);
+		SET_TREE_VALUE_FLT(12, modd->scale);
+		SET_TREE_VALUE_FMT(13, "{%" PRIu8 ", %" PRIu8 ", %" PRIu8 ", %" PRIu8 "}", modd->color.x, modd->color.y, modd->color.z, modd->color.w);
 	}
 	gtk_tree_view_set_model(GTK_TREE_VIEW(tree), GTK_TREE_MODEL(store));
 	gtk_widget_show(tree);

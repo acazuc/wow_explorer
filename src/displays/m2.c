@@ -42,7 +42,22 @@ static void dtr(struct display *ptr)
 	wow_m2_file_delete(display->file);
 }
 
-static char *generate_track_values_int16(const struct wow_m2_track *track, char *d, size_t n)
+static char *generate_track_values_uint8(char *d, size_t n, const struct wow_m2_track *track)
+{
+	char *s = d;
+	d[0] = '\0';
+	for (size_t i = 0; i < track->values_nb; ++i)
+	{
+		size_t ret = snprintf(d, n, "{%" PRIu8 ", %" PRIu32 "}%s", ((uint8_t*)track->values)[i], track->timestamps[i], (i + 1) < track->values_nb ? ", " : "");
+		if (ret >= n)
+			break;
+		d += ret;
+		n -= ret;
+	}
+	return s;
+}
+
+static char *generate_track_values_int16(char *d, size_t n, const struct wow_m2_track *track)
 {
 	char *s = d;
 	d[0] = '\0';
@@ -57,7 +72,22 @@ static char *generate_track_values_int16(const struct wow_m2_track *track, char 
 	return s;
 }
 
-static char *generate_track_values_vec3f(const struct wow_m2_track *track, char *d, size_t n)
+static char *generate_track_values_flt(char *d, size_t n, const struct wow_m2_track *track)
+{
+	char *s = d;
+	d[0] = '\0';
+	for (size_t i = 0; i < track->values_nb; ++i)
+	{
+		size_t ret = snprintf(d, n, "{%f, %" PRIu32 "}%s", ((float*)track->values)[i], track->timestamps[i], (i + 1) < track->values_nb ? ", " : "");
+		if (ret >= n)
+			break;
+		d += ret;
+		n -= ret;
+	}
+	return s;
+}
+
+static char *generate_track_values_vec3f(char *d, size_t n, const struct wow_m2_track *track)
 {
 	char *s = d;
 	d[0] = '\0';
@@ -73,7 +103,7 @@ static char *generate_track_values_vec3f(const struct wow_m2_track *track, char 
 	return s;
 }
 
-static char *generate_track_values_quatf(const struct wow_m2_track *track, char *d, size_t n)
+static char *generate_track_values_quatf(char *d, size_t n, const struct wow_m2_track *track)
 {
 	char *s = d;
 	d[0] = '\0';
@@ -87,6 +117,27 @@ static char *generate_track_values_quatf(const struct wow_m2_track *track, char 
 		n -= ret;
 	}
 	return s;
+}
+
+static char *generate_track_str_flt(char *d, size_t n, const struct wow_m2_track *track)
+{
+	char values[4096];
+	snprintf(d, n, "{interpolation_type: %" PRIu16 ", global_sequence: %" PRId16 ", interpolation_ranges_nb: %" PRIu32 ", values: %s}", track->interpolation_type, track->global_sequence, track->interpolation_ranges_nb, generate_track_values_flt(values, sizeof(values), track));
+	return d;
+}
+
+static char *generate_track_str_vec3f(char *d, size_t n, const struct wow_m2_track *track)
+{
+	char values[4096];
+	snprintf(d, n, "{interpolation_type: %" PRIu16 ", global_sequence: %" PRId16 ", interpolation_ranges_nb: %" PRIu32 ", values: %s}", track->interpolation_type, track->global_sequence, track->interpolation_ranges_nb, generate_track_values_vec3f(values, sizeof(values), track));
+	return d;
+}
+
+static char *generate_track_str_uint8(char *d, size_t n, const struct wow_m2_track *track)
+{
+	char values[4096];
+	snprintf(d, n, "{interpolation_type: %" PRIu16 ", global_sequence: %" PRId16 ", interpolation_ranges_nb: %" PRIu32 ", values: %s}", track->interpolation_type, track->global_sequence, track->interpolation_ranges_nb, generate_track_values_uint8(values, sizeof(values), track));
+	return d;
 }
 
 struct display *m2_display_new(const struct node *node, const char *path, struct wow_mpq_file *mpq_file)
@@ -422,7 +473,7 @@ static GtkWidget *build_camera_lookups(struct m2_display *display)
 
 static GtkWidget *build_lights(struct m2_display *display)
 {
-	GtkListStore *store = gtk_list_store_new(4, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_INT64, G_TYPE_STRING);
+	GtkListStore *store = gtk_list_store_new(11, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_INT64, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
 	GtkWidget *tree = gtk_tree_view_new();
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree), true);
 	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
@@ -430,8 +481,16 @@ static GtkWidget *build_lights(struct m2_display *display)
 	ADD_TREE_COLUMN(1, "type");
 	ADD_TREE_COLUMN(2, "bone");
 	ADD_TREE_COLUMN(3, "position");
+	ADD_TREE_COLUMN(4, "ambient_color");
+	ADD_TREE_COLUMN(5, "ambient_intensity");
+	ADD_TREE_COLUMN(6, "diffuse_color");
+	ADD_TREE_COLUMN(7, "diffuse_intensity");
+	ADD_TREE_COLUMN(8, "attenuation_start");
+	ADD_TREE_COLUMN(9, "attenuation_end");
+	ADD_TREE_COLUMN(10, "visibility");
 	for (uint32_t i = 0; i < display->file->lights_nb; ++i)
 	{
+		char buf[4096];
 		const struct wow_m2_light *light = &display->file->lights[i];
 		GtkTreeIter iter;
 		gtk_list_store_append(store, &iter);
@@ -439,6 +498,13 @@ static GtkWidget *build_lights(struct m2_display *display)
 		SET_TREE_VALUE_U64(1, light->type);
 		SET_TREE_VALUE_I64(2, light->bone);
 		SET_TREE_VALUE_FMT(3, "{%f, %f, %f}", light->position.x, light->position.y, light->position.z);
+		SET_TREE_VALUE_STR(4, generate_track_str_vec3f(buf, sizeof(buf), &light->ambient_color));
+		SET_TREE_VALUE_STR(5, generate_track_str_flt(buf, sizeof(buf), &light->ambient_intensity));
+		SET_TREE_VALUE_STR(6, generate_track_str_vec3f(buf, sizeof(buf), &light->diffuse_color));
+		SET_TREE_VALUE_STR(7, generate_track_str_flt(buf, sizeof(buf), &light->diffuse_intensity));
+		SET_TREE_VALUE_STR(8, generate_track_str_flt(buf, sizeof(buf), &light->attenuation_start));
+		SET_TREE_VALUE_STR(9, generate_track_str_flt(buf, sizeof(buf), &light->attenuation_end));
+		SET_TREE_VALUE_STR(10, generate_track_str_uint8(buf, sizeof(buf), &light->visibility));
 	}
 	gtk_tree_view_set_model(GTK_TREE_VIEW(tree), GTK_TREE_MODEL(store));
 	gtk_widget_show(tree);
@@ -517,7 +583,7 @@ static GtkWidget *build_bones(struct m2_display *display)
 
 static GtkWidget *build_particles(struct m2_display *display)
 {
-	GtkListStore *store = gtk_list_store_new(35, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_STRING, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_FLOAT, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_FLOAT, G_TYPE_FLOAT, G_TYPE_FLOAT, G_TYPE_FLOAT, G_TYPE_FLOAT, G_TYPE_FLOAT, G_TYPE_FLOAT, G_TYPE_FLOAT, G_TYPE_STRING, G_TYPE_FLOAT, G_TYPE_FLOAT, G_TYPE_FLOAT, G_TYPE_FLOAT, G_TYPE_FLOAT);
+	GtkListStore *store = gtk_list_store_new(45, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_STRING, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_FLOAT, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_FLOAT, G_TYPE_FLOAT, G_TYPE_FLOAT, G_TYPE_FLOAT, G_TYPE_FLOAT, G_TYPE_FLOAT, G_TYPE_FLOAT, G_TYPE_FLOAT, G_TYPE_STRING, G_TYPE_FLOAT, G_TYPE_FLOAT, G_TYPE_FLOAT, G_TYPE_FLOAT, G_TYPE_FLOAT, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
 	GtkWidget *tree = gtk_tree_view_new();
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree), true);
 	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
@@ -541,7 +607,7 @@ static GtkWidget *build_particles(struct m2_display *display)
 	ADD_TREE_COLUMN(17, "lifespan_uv_anim");
 	ADD_TREE_COLUMN(18, "decay_uv_anim");
 	ADD_TREE_COLUMN(19, "tail_uv_anim");
-	ADD_TREE_COLUMN(20, "tial_decay_uv_anim");
+	ADD_TREE_COLUMN(20, "tail_decay_uv_anim");
 	ADD_TREE_COLUMN(21, "tail_length");
 	ADD_TREE_COLUMN(22, "twinkle_speed");
 	ADD_TREE_COLUMN(23, "twinkle_percent");
@@ -556,8 +622,19 @@ static GtkWidget *build_particles(struct m2_display *display)
 	ADD_TREE_COLUMN(32, "follow_scale1");
 	ADD_TREE_COLUMN(33, "follow_speed2");
 	ADD_TREE_COLUMN(34, "follow_scale2");
+	ADD_TREE_COLUMN(35, "emission_speed");
+	ADD_TREE_COLUMN(36, "speed_variation");
+	ADD_TREE_COLUMN(37, "vertical_range");
+	ADD_TREE_COLUMN(38, "horizontal_range");
+	ADD_TREE_COLUMN(39, "gravity");
+	ADD_TREE_COLUMN(40, "lifespan");
+	ADD_TREE_COLUMN(41, "emission_rate");
+	ADD_TREE_COLUMN(42, "emission_area_length");
+	ADD_TREE_COLUMN(43, "emission_area_width");
+	ADD_TREE_COLUMN(44, "z_source");
 	for (uint32_t i = 0; i < display->file->particles_nb; ++i)
 	{
+		char buf[4096];
 		const struct wow_m2_particle *particle = &display->file->particles[i];
 		GtkTreeIter iter;
 		gtk_list_store_append(store, &iter);
@@ -596,6 +673,16 @@ static GtkWidget *build_particles(struct m2_display *display)
 		SET_TREE_VALUE_FLT(32, particle->follow_scale1);
 		SET_TREE_VALUE_FLT(33, particle->follow_speed2);
 		SET_TREE_VALUE_FLT(34, particle->follow_scale2);
+		SET_TREE_VALUE_STR(35, generate_track_values_flt(buf, sizeof(buf), &particle->emission_speed));
+		SET_TREE_VALUE_STR(36, generate_track_values_flt(buf, sizeof(buf), &particle->speed_variation));
+		SET_TREE_VALUE_STR(37, generate_track_values_flt(buf, sizeof(buf), &particle->vertical_range));
+		SET_TREE_VALUE_STR(38, generate_track_values_flt(buf, sizeof(buf), &particle->horizontal_range));
+		SET_TREE_VALUE_STR(39, generate_track_values_flt(buf, sizeof(buf), &particle->gravity));
+		SET_TREE_VALUE_STR(40, generate_track_values_flt(buf, sizeof(buf), &particle->lifespan));
+		SET_TREE_VALUE_STR(41, generate_track_values_flt(buf, sizeof(buf), &particle->emission_rate));
+		SET_TREE_VALUE_STR(42, generate_track_values_flt(buf, sizeof(buf), &particle->emission_area_length));
+		SET_TREE_VALUE_STR(43, generate_track_values_flt(buf, sizeof(buf), &particle->emission_area_width));
+		SET_TREE_VALUE_STR(44, generate_track_values_flt(buf, sizeof(buf), &particle->z_source));
 	}
 	gtk_tree_view_set_model(GTK_TREE_VIEW(tree), GTK_TREE_MODEL(store));
 	gtk_widget_show(tree);
@@ -705,7 +792,7 @@ static GtkWidget *build_texture_weights(struct m2_display *display)
 		SET_TREE_VALUE_I64(2, weight->global_sequence);
 		SET_TREE_VALUE_U64(3, weight->values_nb);
 		SET_TREE_VALUE_U64(4, weight->timestamps_nb);
-		SET_TREE_VALUE_STR(5, generate_track_values_int16(weight, data, sizeof(data)));
+		SET_TREE_VALUE_STR(5, generate_track_values_int16(data, sizeof(data), weight));
 	}
 	gtk_tree_view_set_model(GTK_TREE_VIEW(tree), GTK_TREE_MODEL(store));
 	gtk_widget_show(tree);
@@ -757,7 +844,7 @@ static GtkWidget *build_texture_transforms(struct m2_display *display)
 		SET_TREE_VALUE_I64(3, transform->translation.global_sequence);
 		SET_TREE_VALUE_U64(4, transform->translation.values_nb);
 		SET_TREE_VALUE_U64(5, transform->translation.timestamps_nb);
-		SET_TREE_VALUE_STR(6, generate_track_values_vec3f(&transform->translation, data, sizeof(data)));
+		SET_TREE_VALUE_STR(6, generate_track_values_vec3f(data, sizeof(data), &transform->translation));
 		gtk_list_store_append(store, &iter);
 		SET_TREE_VALUE_U64(0, i);
 		SET_TREE_VALUE_STR(1, "rotation");
@@ -765,7 +852,7 @@ static GtkWidget *build_texture_transforms(struct m2_display *display)
 		SET_TREE_VALUE_I64(3, transform->rotation.global_sequence);
 		SET_TREE_VALUE_U64(4, transform->rotation.values_nb);
 		SET_TREE_VALUE_U64(5, transform->rotation.timestamps_nb);
-		SET_TREE_VALUE_STR(6, generate_track_values_quatf(&transform->rotation, data, sizeof(data)));
+		SET_TREE_VALUE_STR(6, generate_track_values_quatf(data, sizeof(data), &transform->rotation));
 		gtk_list_store_append(store, &iter);
 		SET_TREE_VALUE_U64(0, i);
 		SET_TREE_VALUE_STR(1, "scaling");
@@ -773,7 +860,7 @@ static GtkWidget *build_texture_transforms(struct m2_display *display)
 		SET_TREE_VALUE_I64(3, transform->scaling.global_sequence);
 		SET_TREE_VALUE_U64(4, transform->scaling.values_nb);
 		SET_TREE_VALUE_U64(5, transform->scaling.timestamps_nb);
-		SET_TREE_VALUE_STR(6, generate_track_values_vec3f(&transform->scaling, data, sizeof(data)));
+		SET_TREE_VALUE_STR(6, generate_track_values_vec3f(data, sizeof(data), &transform->scaling));
 	}
 	gtk_tree_view_set_model(GTK_TREE_VIEW(tree), GTK_TREE_MODEL(store));
 	gtk_widget_show(tree);

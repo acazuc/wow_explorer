@@ -1,6 +1,6 @@
 NAME = explorer
 
-SL_LIBS = libwow jks
+JKL_LIBS = libwow jks
 
 LIB_DIR = lib/build
 
@@ -65,6 +65,6 @@ clean:
 	@rm -f $(NAME)
 
 lib:
-	@cd lib/sl_lib && SL_LIBS="$(SL_LIBS)" CFLAGS="$(CFLAGS)" sh build.sh -xb -t "linux_64" -m static -o "$(PWD)/$(LIB_DIR)" -j6
+	@cd lib/jkl && SL_LIBS="$(JKL_LIBS)" CFLAGS="$(CFLAGS)" sh build.sh -xb -t "linux_64" -m static -o "$(PWD)/$(LIB_DIR)" -j6
 
 .PHONY: clean lib
